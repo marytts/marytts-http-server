@@ -18,9 +18,9 @@ apply plugin: 'spring-boot'
 
 jar {
     baseName = 'marytts-http-server'
-    version =  '0.1.0'
+    version =  '0.1.0-SNAPSHOT'
 }
-
+status 'integration'
 
 repositories {
     mavenLocal()
