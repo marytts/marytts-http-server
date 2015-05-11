@@ -1,0 +1,60 @@
+// FIXME: add test if voices exist in the class path !
+buildscript {
+    repositories {
+        maven {
+            url 'https://oss.jfrog.org/artifactory/repo'
+        }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.2.3.RELEASE")
+    }
+}
+
+
+apply plugin: 'java'
+// apply plugin: 'eclipse'
+// apply plugin: 'idea'
+apply plugin: 'spring-boot'
+
+jar {
+    baseName = 'marytts-http-server'
+    version =  '0.1.0'
+}
+
+
+repositories {
+    mavenLocal()
+    maven {
+        url 'https://oss.jfrog.org/artifactory/repo'
+    }
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+def maryttsVersion = '5.1.1'
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web") {
+        exclude module: "logback-classic"
+    }
+    testCompile("junit:junit")
+   
+    compile group: 'de.dfki.mary', name: 'marytts-runtime', version: maryttsVersion
+    ['en'].each { locale ->
+        runtime group: 'de.dfki.mary', name: "marytts-lang-$locale", version: maryttsVersion
+    }
+
+    testCompile group: 'de.dfki.mary', name: 'marytts-runtime', version: maryttsVersion
+    ['en'].each { locale ->
+        testCompile group: 'de.dfki.mary', name: "marytts-lang-$locale", version: maryttsVersion
+    }
+
+    ['voice-cmu-slt-hsmm'].each { voice ->
+        compile group: 'de.dfki.mary', name: voice, version: maryttsVersion
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.3'
+}
