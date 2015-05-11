@@ -1,3 +1,23 @@
+/**
+ * Copyright 2015 DFKI GmbH.
+ * All Rights Reserved.  Use is subject to license terms.
+ *
+ * This file is part of MARY TTS.
+ *
+ * MARY TTS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 package marytts.http;
 
 /* RESTFULL / HTTP part */
@@ -25,6 +45,9 @@ import javax.sound.sampled.AudioFileFormat;
 import marytts.LocalMaryInterface;
 import marytts.modules.synthesis.Voice;
 import marytts.util.MaryUtils;
+
+
+
 
 /**
  *  Mary RESTFUL controller class
@@ -200,7 +223,9 @@ public class MaryController
      *    @throws Exception in case of unexisting type or if type is not an input one
      */  
     @RequestMapping("/setInputType")
-    public void setInputType(@RequestParam(value="type") String type) {
+    public void setInputType(@RequestParam(value="type") String type)
+        throws Exception
+    {
         local_mary.setInputType(type);
     }
 
@@ -212,7 +237,9 @@ public class MaryController
      *    @throws Exception in case of unexisting type or if type is not an output one
      */  
     @RequestMapping("/setOutputType")
-    public void setOutputType(@RequestParam(value="type") String type) {
+    public void setOutputType(@RequestParam(value="type") String type)
+        throws Exception
+    {
         local_mary.setOutputType(type);
     }
 
@@ -224,6 +251,7 @@ public class MaryController
      */  
     @RequestMapping("/setLoggerLevel")
     public void setLoggerLevel(@RequestParam(value="level") String level)
+        throws Exception
     {
         throw new UnsupportedOperationException("Not implemented yet !");
     }
@@ -300,12 +328,12 @@ public class MaryController
      *    @throws Exception in case of failing (no synthesis called before, ...)
      */
     @RequestMapping("/getSynthesizedSignal")
-    public void getFile(HttpServletResponse response)
+    public void getSynthesizedSignal(HttpServletResponse response)
         throws Exception
     {
         if (ais == null)
         {
-            throw new RuntimeException("No synthesis achieved => no signal to get !")
+            throw new RuntimeException("No synthesis achieved => no signal to get !");
         }
         
         response.setContentType("audio/x-wav");
