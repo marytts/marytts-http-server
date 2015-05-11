@@ -16,10 +16,7 @@ apply plugin: 'java'
 // apply plugin: 'idea'
 apply plugin: 'spring-boot'
 
-jar {
-    baseName = 'marytts-http-server'
-    version =  '0.1.0-SNAPSHOT'
-}
+version '0.1.0-SNAPSHOT'
 status 'integration'
 
 repositories {
