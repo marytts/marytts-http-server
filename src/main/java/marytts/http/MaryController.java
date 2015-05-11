@@ -17,16 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 package marytts.http;
 
 /* RESTFULL / HTTP part */
 import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 
 /* Utils */
 import java.util.ArrayList;
@@ -35,6 +32,7 @@ import java.util.Locale;
 /* IO */
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.ByteArrayInputStream;
 
 /* Audio */
 import javax.sound.sampled.AudioInputStream;
@@ -45,7 +43,12 @@ import javax.sound.sampled.AudioFileFormat;
 import marytts.LocalMaryInterface;
 import marytts.modules.synthesis.Voice;
 import marytts.util.MaryUtils;
+import marytts.util.dom.DomUtils;
 
+/* XML */
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import org.w3c.dom.Document;
 
 
 
@@ -74,7 +77,6 @@ public class MaryController
     /**************************************************************************
      ** Listings
      **************************************************************************/
-
     /**
      *  Method used to list available voices for a given locale in the current MaryTTS instance
      *
@@ -273,28 +275,86 @@ public class MaryController
         throws Exception
     {
 
-        // Deal with input type
-
         // Deal with output type
-        
-        if (local_mary.isAudioType(local_mary.getOutputType()))
+        if (local_mary.isAudioType(local_mary.getOutputType())) // Audio
         {
-            //ais = local_mary.generateAudio(text);
+            
+            // Deal with input type
+            if (local_mary.isTextType(local_mary.getInputType())) // Text 
+            {
+                ais = local_mary.generateAudio(input);
+            }
+            else if (local_mary.isXMLType(local_mary.getOutputType())) // XML
+            {
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                
+                factory.setNamespaceAware(true);
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                
+                Document in_xml = builder.parse(new ByteArrayInputStream(input.getBytes()));
+                
+                ais = local_mary.generateAudio(in_xml);
+            }
+            else
+            {
+                throw new Exception("Unknown input type");
+            }
+            
             
             return new MaryResponse(null, null, true);
         }
-        else if (local_mary.isTextType(local_mary.getOutputType()))
+        else if (local_mary.isTextType(local_mary.getOutputType())) // Text
         {
+            // Deal with input type
+            if (local_mary.isTextType(local_mary.getInputType())) // Text 
+            {
+                return new MaryResponse(local_mary.generateText(input), null, false);
+            }
+            else if (local_mary.isXMLType(local_mary.getOutputType())) // XML
+            {
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                
+                factory.setNamespaceAware(true);
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                
+                Document in_xml = builder.parse(new ByteArrayInputStream(input.getBytes()));
+                
+                return new MaryResponse(local_mary.generateText(in_xml), null, false);
+            }
+            else
+            {
+                throw new Exception("Unknown input type");
+            }
+            
         }
-        else if (local_mary.isXMLType(local_mary.getOutputType()))
+        else if (local_mary.isXMLType(local_mary.getOutputType())) // XML
         {
+            // Deal with input type
+            if (local_mary.isTextType(local_mary.getInputType())) // Text 
+            {
+                return new MaryResponse(DomUtils.document2String(local_mary.generateXML(input)), null, false);
+            }
+            else if (local_mary.isXMLType(local_mary.getOutputType())) // XML
+            {
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                
+                factory.setNamespaceAware(true);
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                
+                Document in_xml = builder.parse(new ByteArrayInputStream(input.getBytes()));
+                
+                return new MaryResponse(DomUtils.document2String(local_mary.generateXML(in_xml)), null, false);
+            }
+            else
+            {
+                throw new Exception("Unknown input type");
+            }
         }
         else
         {
-            throw new Exception("Unknown kind of type");
+            throw new Exception("Unknown output type");
         }
 
-        return null;
     }
 
 
