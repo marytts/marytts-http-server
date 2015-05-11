@@ -17,6 +17,6 @@ To run the server you just have to execute this command in a terminal :
 
 You can access to the server through this address
 ```
-http://localhost:5925
+http://localhost:59125
 ```
 
