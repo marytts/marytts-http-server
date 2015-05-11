@@ -276,8 +276,8 @@ public class MaryController
      **************************************************************************/
     /**
      *  Main entry point method : synthesis of a given text. It doesn't provide the signal but needs
-     *  to be called first. If the call succeed, the method getSynthesizedSignal should be call to
-     *  retrieve the signal
+     *  to be called first. If the call succeed, the method {@link
+     *  getSynthesizedSignal(HttpServletResponse)} should be call to retrieve the signal
      *
      *    @param text : the text to synthesize
      *    @return MaryResponse the response where the result field contains null and synthDone
