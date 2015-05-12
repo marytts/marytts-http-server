@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.context.annotation.Scope;
 
 /* Utils */
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ import org.w3c.dom.Document;
  * @author <a href="mailto:slemaguer@coli.uni-saarland.de">Sébastien Le Maguer</a>
  */
 @RestController
+@Scope("session")
 public class MaryController
 {    
     private AudioInputStream ais; /*< Synthesized audio stream saved to be accessed through getSynthesizedSignal */
