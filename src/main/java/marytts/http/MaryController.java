@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Scope;
 
 /* Utils */
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Locale;
 
 /* IO */
@@ -59,9 +60,10 @@ import org.w3c.dom.Document;
  * @author <a href="mailto:slemaguer@coli.uni-saarland.de">Sébastien Le Maguer</a>
  */
 @RestController
-@Scope("session")
+// @Scope("session")
 public class MaryController
-{    
+{
+    private String current_language;
     private AudioInputStream ais; /*< Synthesized audio stream saved to be accessed through getSynthesizedSignal */
     private LocalMaryInterface local_mary; /*< Interface to the MaryTTS system */
 
@@ -87,12 +89,25 @@ public class MaryController
      *    @throws Exception in the case of the listing is failing
      */
     @RequestMapping("/listVoices")
-    public MaryListResponse listVoices(@RequestParam(value="locale", defaultValue="en_US")
-                                       String locale)
+    public MaryListResponse listVoices(@RequestParam(value="language", defaultValue="none") String language,
+                                       @RequestParam(value="region", defaultValue="none") String region)
         throws Exception
     {
+        Locale locale_obj;
+        if (language.equals("none")) {
+            locale_obj =  local_mary.getLocale();
+        }
+        else
+        {
+            String locale = language;
+            if (!region.isEmpty())
+            {
+                locale += "_" + region;
+            }
+            
+            locale_obj = MaryUtils.string2locale(locale);
+        }
         ArrayList<String> result = new ArrayList<String>();
-        Locale locale_obj = MaryUtils.string2locale(locale);
         
         // List voices and only retrieve the names
         for (Voice v: Voice.getAvailableVoices(locale_obj)) {
@@ -102,24 +117,57 @@ public class MaryController
         return new MaryListResponse(result, null, false);
     }
 
+
     /**
-     *  Method used to list available locales in the current MaryTTS instance
+     *  Method used to list available languages in the current MaryTTS instance
      *
-     *    @return a MaryListResponse object where result field contains the list of locales
+     *    @return a MaryListResponse object where result field contains the list of languages
      *    @throws Exception in the case of the listing is failing
      */    
-    @RequestMapping("/listLocales")
-    public MaryListResponse listlocales()
+    @RequestMapping("/listLanguages")
+    public MaryListResponse listLanguages()
         throws Exception
     {
-        ArrayList<String> result = new ArrayList<String>();
+        HashSet<String> result = new HashSet<String>();
         
         // List voices and only retrieve the names
         for (Locale l: local_mary.getAvailableLocales()) {
-            result.add(l.toString());
+            String[] elts = l.toString().split("_");
+            
+            result.add(elts[0]);
         }
 
-        return new MaryListResponse(result, null, false);
+        return new MaryListResponse(new ArrayList<String>(result), null, false);
+    }
+    /**
+     *  Method used to list available regions for a given language in the current MaryTTS instance
+     *
+     *    @param language the given language shortcut ("en", "de", ...)
+     *    @return a MaryListResponse object where result field contains the list of regions
+     *    @throws Exception in the case of the listing is failing
+     */    
+    @RequestMapping("/listRegions")
+    public MaryListResponse listRegions(@RequestParam(value="language", defaultValue="en") String language)
+        throws Exception
+    {
+        HashSet<String> result = new HashSet<String>();
+        
+        // List voices and only retrieve the names
+        for (Locale l: local_mary.getAvailableLocales()) {
+            String[] elts = l.toString().split("_");
+            if (elts.length < 2)
+            {
+                if (elts[0].equals(language))
+                {
+                    result.add(language.toUpperCase());
+                }
+            }
+            else if (elts[0].equals(language)) {
+                result.add(elts[1]);
+            }
+        }
+
+        return new MaryListResponse(new ArrayList<String>(result), null, false);
     }
 
     /**
@@ -177,6 +225,42 @@ public class MaryController
     {
         return new MaryResponse(local_mary.getLocale().toString(), null, false);
     }
+
+    /**
+     *  Method used to get the current language name
+     *
+     *    @return a MaryResponse object where result field contains the current language name
+     */  
+    @RequestMapping("/getCurrentLanguage")
+    public MaryResponse getCurrentLanguage()
+    {
+        // Init based on locale !
+        if (current_language == null)
+        {
+            current_language = local_mary.getLocale().toString().split("_")[0];
+        }
+        
+        return new MaryResponse(current_language, null, false);
+    }
+
+    
+
+    /**
+     *  Method used to get the current region name
+     *
+     *    @return a MaryResponse object where result field contains the current region name
+     */  
+    @RequestMapping("/getCurrentRegion")
+    public MaryResponse getCurrentRegion()
+    {
+        String[] elts = local_mary.getLocale().toString().split("_");
+        String current_region = elts[0].toUpperCase();
+        if (elts.length > 1)
+            current_region = elts[1];
+        
+        return new MaryResponse(current_region, null, false);
+    }
+
     
     /**
      *  Method used to get the current voice name
@@ -202,6 +286,60 @@ public class MaryController
     public void setLocale(@RequestParam(value="locale") String locale)
         throws Exception
     {
+        local_mary.setLocale(MaryUtils.string2locale(locale));
+        String[] elts = local_mary.getLocale().toString().split("_");
+        current_language = elts[0];
+    }
+
+    
+    /**
+     *  Method used to set the current locale
+     *
+     *    @param locale the new locale to set (format is the standard one like en_US for example)
+     *    @throws Exception in case of unexisting local
+     */  
+    @RequestMapping("/setLanguage")
+    public void setLanguage(@RequestParam(value="language") String language)
+        throws Exception
+    {
+        HashSet<String> result = new HashSet<String>();
+        
+        // List voices and only retrieve the names
+        for (Locale l: local_mary.getAvailableLocales())
+        {
+            String[] elts = l.toString().split("_");
+            if (elts.length < 2)
+            {
+                if (elts[0].equals(language))
+                {
+                    local_mary.setLocale(l);
+                    break;
+                }
+            }
+            else if (elts[0].equals(language))
+            {
+                local_mary.setLocale(l);
+                break;
+            }
+        }
+
+        // FIXME: how to find the default region !
+
+        current_language = language;
+    }
+
+    
+    /**
+     *  Method used to set the current locale
+     *
+     *    @param locale the new locale to set (format is the standard one like en_US for example)
+     *    @throws Exception in case of unexisting local
+     */  
+    @RequestMapping("/setRegion")
+    public void setRegion(@RequestParam(value="region") String region)
+        throws Exception
+    {
+        String locale = current_language + "_" + region;
         local_mary.setLocale(MaryUtils.string2locale(locale));
     }
 
