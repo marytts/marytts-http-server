@@ -35,7 +35,7 @@ configurations {
   jaxDoclet
 }
 
-def maryttsVersion = '5.1.1'
+def maryttsVersion = '5.1.2'
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web") {
@@ -56,6 +56,8 @@ dependencies {
     ['voice-cmu-slt-hsmm'].each { voice ->
         compile group: 'de.dfki.mary', name: voice, version: maryttsVersion
     }
+    
+    // runtime fileTree(dir: 'installed', include: '*.jar')
 }
 
 task wrapper(type: Wrapper) {
