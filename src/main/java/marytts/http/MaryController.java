@@ -52,6 +52,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.Document;
 
+/* Json */
+import org.json.XML;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 
 /**
@@ -139,6 +143,7 @@ public class MaryController
 
         return new MaryListResponse(new ArrayList<String>(result), null, false);
     }
+    
     /**
      *  Method used to list available regions for a given language in the current MaryTTS instance
      *
@@ -223,7 +228,7 @@ public class MaryController
     @RequestMapping("/getCurrentLocale")
     public MaryResponse getCurrentLocale()
     {
-        return new MaryResponse(local_mary.getLocale().toString(), null, false);
+        return new MaryResponse(local_mary.getLocale(), null, false);
     }
 
     /**
@@ -407,14 +412,21 @@ public class MaryController
      *  Method used to process a text-based input considering the current configuration of MaryTTS
      *
      *    @param input the input in a text-based format (XML is detected otherwise everything is considered as a text)
+     *    @param
      *    @return MaryResponse the response where the result field contains the result information
      *    @throws Exception in case of failing (possible failing are invalid types, bad input value, ...)
      */
     @RequestMapping("/process")
-    public MaryResponse process(@RequestParam(value="input") String input)
+    public MaryResponse process(@RequestParam(value="input") String input, @RequestParam(required=false) String inputType, @RequestParam(required=false) String outputType)
         throws Exception
     {
 
+        if (inputType != null)
+            local_mary.setInputType(inputType);
+
+        if (outputType != null)
+            local_mary.setOutputType(outputType);
+                
         // Deal with output type
         if (local_mary.isAudioType(local_mary.getOutputType())) // Audio
         {
@@ -472,7 +484,9 @@ public class MaryController
             // Deal with input type
             if (local_mary.isTextType(local_mary.getInputType())) // Text 
             {
-                return new MaryResponse(DomUtils.document2String(local_mary.generateXML(input)), null, false);
+                
+                //DomUtils.document2String());
+                return new MaryResponse(local_mary.generateXML(input), null, false);
             }
             else if (local_mary.isXMLType(local_mary.getOutputType())) // XML
             {
@@ -482,8 +496,9 @@ public class MaryController
                 DocumentBuilder builder = factory.newDocumentBuilder();
                 
                 Document in_xml = builder.parse(new ByteArrayInputStream(input.getBytes()));
-                
-                return new MaryResponse(DomUtils.document2String(local_mary.generateXML(in_xml)), null, false);
+               
+                // DomUtils.document2String();
+                return new MaryResponse(local_mary.generateXML(in_xml), null, false);
             }
             else
             {
@@ -516,7 +531,10 @@ public class MaryController
     public MaryResponse synthesize(@RequestParam(value="text") String text)
         throws Exception
     {
+        String output_type = local_mary.getOutputType();
+        local_mary.setOutputType("AUDIO");
         ais = local_mary.generateAudio(text);
+        local_mary.setOutputType(output_type);
         return new MaryResponse(null, null, true);
     }
 

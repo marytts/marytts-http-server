@@ -25,7 +25,7 @@ package marytts.http;
  */
 public class MaryResponse
 {
-    private final String result; /*< The result value */
+    private final Object result; /*< The result value */
     private final String log; /*< The server log */
     private final boolean synth_done; /*< Status to indicate in the synthesis is achieved or not */
 
@@ -36,7 +36,7 @@ public class MaryResponse
      *     @param log the server log
      *     @param synth_done the status of the synthesis
      */
-    public MaryResponse(String result, String log, boolean synth_done)
+    public MaryResponse(Object result, String log, boolean synth_done)
     {
         this.result = result;
         this.log = log;
@@ -46,9 +46,9 @@ public class MaryResponse
     /**
      *  Accessor to get the result value
      *
-     *     @return the result string
+     *     @return the result json object
      */
-    public String getResult()
+    public Object getResult()
     {
         return result;
     }
@@ -66,7 +66,7 @@ public class MaryResponse
     /**
      *  Accessor to get the synthesis status
      *
-     *     @return the log string
+     *     @return true if a synthesis is achieved
      */
     public boolean isSynthDone()
     {
