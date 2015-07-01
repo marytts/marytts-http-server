@@ -10,14 +10,14 @@ import java.util.ArrayList;
 
 public class Phrase
 {
-    private ArrayList<Word> tokens;
+    private ArrayList<Token> tokens;
 
-    public Phrase(ArrayList<Word> tokens)
+    public Phrase(ArrayList<Token> tokens)
     {
         this.tokens = tokens;
     }
 
-    public ArrayList<Word> getWords()
+    public ArrayList<Token> getTokens()
     {
         return tokens;
     }

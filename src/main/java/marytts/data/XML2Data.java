@@ -30,12 +30,12 @@ public class XML2Data
 
         if (elt.getNodeName().equals("phrase"))
         {
-            ArrayList<Word> tokens = new ArrayList<Word>();
+            ArrayList<Token> tokens = new ArrayList<Token>();
             for (int i = 0; i<nbChildren; i++) {
                 if(children.item(i).getNodeType() == Node.ELEMENT_NODE) {
                     for (Object o:analyzeXML((Element) children.item(i)))
                     {
-                        tokens.add((Word) o);
+                        tokens.add((Token) o);
                     }
                 }
             }
@@ -53,7 +53,7 @@ public class XML2Data
                     }
                 }
             }
-            Word w = new Word(syllables, elt.getAttribute("pos"));
+            Token w = new Token(syllables, elt.getAttribute("pos"));
             list.add(w);
         }
         else if (elt.getNodeName().equals("syllable"))
