@@ -52,11 +52,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.Document;
 
-/* Json */
-import org.json.XML;
-import org.json.JSONObject;
-import org.json.JSONException;
-
+/* Data */
+import marytts.data.XML2Data;
 
 /**
  *  Mary RESTFUL controller class
@@ -412,12 +409,15 @@ public class MaryController
      *  Method used to process a text-based input considering the current configuration of MaryTTS
      *
      *    @param input the input in a text-based format (XML is detected otherwise everything is considered as a text)
-     *    @param
+     *    @param inputType the inputType (can be null)
+     *    @param outputType the outputType (can be null)
      *    @return MaryResponse the response where the result field contains the result information
      *    @throws Exception in case of failing (possible failing are invalid types, bad input value, ...)
      */
     @RequestMapping("/process")
-    public MaryResponse process(@RequestParam(value="input") String input, @RequestParam(required=false) String inputType, @RequestParam(required=false) String outputType)
+    public MaryResponse process(@RequestParam(value="input") String input,
+                                @RequestParam(required=false) String inputType,
+                                @RequestParam(required=false) String outputType)
         throws Exception
     {
 
@@ -486,7 +486,7 @@ public class MaryController
             {
                 
                 //DomUtils.document2String());
-                return new MaryResponse(local_mary.generateXML(input), null, false);
+                return new MaryResponse(XML2Data.convertXML(local_mary.generateXML(input)), null, false);
             }
             else if (local_mary.isXMLType(local_mary.getOutputType())) // XML
             {
@@ -498,7 +498,7 @@ public class MaryController
                 Document in_xml = builder.parse(new ByteArrayInputStream(input.getBytes()));
                
                 // DomUtils.document2String();
-                return new MaryResponse(local_mary.generateXML(in_xml), null, false);
+                return new MaryResponse(XML2Data.convertXML(local_mary.generateXML(in_xml)), null, false);
             }
             else
             {
@@ -509,7 +509,6 @@ public class MaryController
         {
             throw new Exception("Unknown output type");
         }
-
     }
 
 
