@@ -3,6 +3,9 @@
 .gradle/
 build/
 
+# Manual linking
+lib
+installed
 
 # Spring diverse
 log
