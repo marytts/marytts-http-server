@@ -27,19 +27,43 @@ public class XML2Data
         ArrayList<Object> list = new ArrayList<Object>();
 	    final NodeList children = elt.getChildNodes();
 	    final int nbChildren = children.getLength();
-
+        
         if (elt.getNodeName().equals("phrase"))
         {
+            String tone = "";
+            int break_index = -1;
+            int end_pause_duration = 0;
             ArrayList<Token> tokens = new ArrayList<Token>();
             for (int i = 0; i<nbChildren; i++) {
-                if(children.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                    for (Object o:analyzeXML((Element) children.item(i)))
+                
+                if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                    if (children.item(i).getNodeName().equals("boundary")) // FIXME: patch to deal with boundaries
                     {
-                        tokens.add((Token) o);
+                        Element bnd = (Element) children.item(i);
+                        tone = bnd.getAttribute("tone");
+                        break_index = Integer.parseInt(bnd.getAttribute("breakindex"));
+                        end_pause_duration = Integer.parseInt(bnd.getAttribute("duration"));
+                    }
+                    else
+                    {
+                        for (Object o:analyzeXML((Element) children.item(i)))
+                        {
+                            tokens.add((Token) o);
+                        }
                     }
                 }
             }
-            Phrase p = new Phrase(tokens);
+            
+            Phrase p;
+            if (end_pause_duration == 0)
+            {
+                p = new Phrase(tokens);
+            }
+            else
+            {
+                
+                p = new Phrase(tokens, break_index, end_pause_duration, tone);
+            }
             list.add(p);
         }
         else if (elt.getNodeName().equals("t"))
@@ -104,46 +128,5 @@ public class XML2Data
             phrases.add((Phrase) o);
         }
         return new Sample(phrases);
-	    // for (int i = 0; i<nbRacineNoeuds; i++) {
-	    //     if(racineNoeuds.item(i).getNodeType() == Node.ELEMENT_NODE) {
-	    //         final Element personne = (Element) racineNoeuds.item(i);
-				
-        //         //Affichage d'une personne
-        //         System.out.println("\n*************PERSONNE************");
-        //         System.out.println("sexe : " + personne.getAttribute("sexe"));
-                
-	    // 	    /*
-        //          * Etape 6 : récupération du nom et du prénom
-        //          */
-        //         final Element nom = (Element) personne.getElementsByTagName("nom").item(0);
-        //         final Element prenom = (Element) personne.getElementsByTagName("prenom").item(0);
-                
-        //         //Affichage du nom et du prénom
-        //         System.out.println("nom : " + nom.getTextContent());
-        //         System.out.println("prénom : " + prenom.getTextContent());
-                
-        //         /*
-        //          * Etape 7 : récupération des numéros de téléphone
-        //          */
-        //         final NodeList telephones = personne.getElementsByTagName("telephone");
-        //         final int nbTelephonesElements = telephones.getLength();
-                
-        //         for(int j = 0; j<nbTelephonesElements; j++) {
-        //             final Element telephone = (Element) telephones.item(j);
-                    
-        //             //Affichage du téléphone
-        //             System.out.println(telephone.getAttribute("type") + " : " + telephone.getTextContent());
-        //         }			
-        //     }			
-        // }
-        // catch (final ParserConfigurationException e) {
-        //     e.printStackTrace();
-        // }
-        // catch (final SAXException e) {
-        //     e.printStackTrace();
-        // }
-        // catch (final IOException e) {
-        //     e.printStackTrace();
-        // }		
     }
 }

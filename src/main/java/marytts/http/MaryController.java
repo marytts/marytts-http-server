@@ -430,7 +430,6 @@ public class MaryController
         // Deal with output type
         if (local_mary.isAudioType(local_mary.getOutputType())) // Audio
         {
-            
             // Deal with input type
             if (local_mary.isTextType(local_mary.getInputType())) // Text 
             {
