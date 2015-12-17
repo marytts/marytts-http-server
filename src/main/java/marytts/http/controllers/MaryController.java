@@ -17,14 +17,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package marytts.http;
+package marytts.http.controllers;
 
 /* RESTFULL / HTTP part */
+import marytts.http.response.MaryListResponse;
+import marytts.http.response.MaryResponse;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.context.annotation.Scope;
 
 /* Utils */
 import java.util.ArrayList;
@@ -32,8 +33,6 @@ import java.util.HashSet;
 import java.util.Locale;
 
 /* IO */
-import java.io.InputStream;
-import java.io.IOException;
 import java.io.ByteArrayInputStream;
 
 /* Audio */
@@ -45,7 +44,6 @@ import javax.sound.sampled.AudioFileFormat;
 import marytts.LocalMaryInterface;
 import marytts.modules.synthesis.Voice;
 import marytts.util.MaryUtils;
-import marytts.util.dom.DomUtils;
 
 /* XML */
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -54,6 +52,7 @@ import org.w3c.dom.Document;
 
 /* Data */
 import marytts.data.XML2Data;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *  Mary RESTFUL controller class
@@ -66,7 +65,8 @@ public class MaryController
 {
     private String current_language;
     private AudioInputStream ais; /*< Synthesized audio stream saved to be accessed through getSynthesizedSignal */
-    private LocalMaryInterface local_mary; /*< Interface to the MaryTTS system */
+    @Autowired
+    private LocalMaryInterface localMary; /*< Interface to the MaryTTS system */
 
     /**
      *  Constructor. Just create an interface to MaryTTS 
@@ -76,7 +76,7 @@ public class MaryController
     public MaryController() throws Exception
     {
         ais = null;
-        local_mary = new LocalMaryInterface();
+        current_language = "en";    //set current language english to avoid exception in setRegion
     }
 
     /**************************************************************************
@@ -96,7 +96,7 @@ public class MaryController
     {
         Locale locale_obj;
         if (language.equals("none")) {
-            locale_obj =  local_mary.getLocale();
+            locale_obj =  localMary.getLocale();
         }
         else
         {
@@ -132,7 +132,7 @@ public class MaryController
         HashSet<String> result = new HashSet<String>();
         
         // List voices and only retrieve the names
-        for (Locale l: local_mary.getAvailableLocales()) {
+        for (Locale l: localMary.getAvailableLocales()) {
             String[] elts = l.toString().split("_");
             
             result.add(elts[0]);
@@ -155,7 +155,7 @@ public class MaryController
         HashSet<String> result = new HashSet<String>();
         
         // List voices and only retrieve the names
-        for (Locale l: local_mary.getAvailableLocales()) {
+        for (Locale l: localMary.getAvailableLocales()) {
             String[] elts = l.toString().split("_");
             if (elts.length < 2)
             {
@@ -185,7 +185,7 @@ public class MaryController
         ArrayList<String> result = new ArrayList<String>();
         
         // List voices and only retrieve the names
-        for (String t: local_mary.getAvailableInputTypes())
+        for (String t: localMary.getAvailableInputTypes())
         {
             result.add(t);
         }
@@ -206,7 +206,7 @@ public class MaryController
         ArrayList<String> result = new ArrayList<String>();
         
         // List voices and only retrieve the names
-        for (String t: local_mary.getAvailableOutputTypes())
+        for (String t: localMary.getAvailableOutputTypes())
         {
             result.add(t);
         }
@@ -225,7 +225,7 @@ public class MaryController
     @RequestMapping("/getCurrentLocale")
     public MaryResponse getCurrentLocale()
     {
-        return new MaryResponse(local_mary.getLocale(), null, false);
+        return new MaryResponse(localMary.getLocale(), null, false);
     }
 
     /**
@@ -239,7 +239,7 @@ public class MaryController
         // Init based on locale !
         if (current_language == null)
         {
-            current_language = local_mary.getLocale().toString().split("_")[0];
+            current_language = localMary.getLocale().toString().split("_")[0];
         }
         
         return new MaryResponse(current_language, null, false);
@@ -255,7 +255,7 @@ public class MaryController
     @RequestMapping("/getCurrentRegion")
     public MaryResponse getCurrentRegion()
     {
-        String[] elts = local_mary.getLocale().toString().split("_");
+        String[] elts = localMary.getLocale().toString().split("_");
         String current_region = elts[0].toUpperCase();
         if (elts.length > 1)
             current_region = elts[1];
@@ -272,7 +272,7 @@ public class MaryController
     @RequestMapping("/getCurrentVoice")
     public MaryResponse getCurrentVoice()
     {
-        return new MaryResponse(local_mary.getVoice(), null, false);
+        return new MaryResponse(localMary.getVoice(), null, false);
     }
     
     /**************************************************************************
@@ -288,8 +288,8 @@ public class MaryController
     public void setLocale(@RequestParam(value="locale") String locale)
         throws Exception
     {
-        local_mary.setLocale(MaryUtils.string2locale(locale));
-        String[] elts = local_mary.getLocale().toString().split("_");
+        localMary.setLocale(MaryUtils.string2locale(locale));
+        String[] elts = localMary.getLocale().toString().split("_");
         current_language = elts[0];
     }
 
@@ -307,20 +307,20 @@ public class MaryController
         HashSet<String> result = new HashSet<String>();
         
         // List voices and only retrieve the names
-        for (Locale l: local_mary.getAvailableLocales())
+        for (Locale l: localMary.getAvailableLocales())
         {
             String[] elts = l.toString().split("_");
             if (elts.length < 2)
             {
                 if (elts[0].equals(language))
                 {
-                    local_mary.setLocale(l);
+                    localMary.setLocale(l);
                     break;
                 }
             }
             else if (elts[0].equals(language))
             {
-                local_mary.setLocale(l);
+                localMary.setLocale(l);
                 break;
             }
         }
@@ -342,7 +342,7 @@ public class MaryController
         throws Exception
     {
         String locale = current_language + "_" + region;
-        local_mary.setLocale(MaryUtils.string2locale(locale));
+        localMary.setLocale(MaryUtils.string2locale(locale));
     }
 
     
@@ -356,7 +356,7 @@ public class MaryController
     public void setVoice(@RequestParam(value="voice") String voice)
         throws Exception
     {
-        local_mary.setVoice(voice);
+        localMary.setVoice(voice);
     }
 
 
@@ -370,7 +370,7 @@ public class MaryController
     public void setInputType(@RequestParam(value="type") String type)
         throws Exception
     {
-        local_mary.setInputType(type);
+        localMary.setInputType(type);
     }
 
     
@@ -384,7 +384,7 @@ public class MaryController
     public void setOutputType(@RequestParam(value="type") String type)
         throws Exception
     {
-        local_mary.setOutputType(type);
+        localMary.setOutputType(type);
     }
 
     /**
@@ -422,20 +422,20 @@ public class MaryController
     {
 
         if (inputType != null)
-            local_mary.setInputType(inputType);
+            localMary.setInputType(inputType);
 
         if (outputType != null)
-            local_mary.setOutputType(outputType);
+            localMary.setOutputType(outputType);
                 
         // Deal with output type
-        if (local_mary.isAudioType(local_mary.getOutputType())) // Audio
+        if (localMary.isAudioType(localMary.getOutputType())) // Audio
         {
             // Deal with input type
-            if (local_mary.isTextType(local_mary.getInputType())) // Text 
+            if (localMary.isTextType(localMary.getInputType())) // Text 
             {
-                ais = local_mary.generateAudio(input);
+                ais = localMary.generateAudio(input);
             }
-            else if (local_mary.isXMLType(local_mary.getOutputType())) // XML
+            else if (localMary.isXMLType(localMary.getOutputType())) // XML
             {
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 
@@ -444,7 +444,7 @@ public class MaryController
                 
                 Document in_xml = builder.parse(new ByteArrayInputStream(input.getBytes()));
                 
-                ais = local_mary.generateAudio(in_xml);
+                ais = localMary.generateAudio(in_xml);
             }
             else
             {
@@ -454,14 +454,14 @@ public class MaryController
             
             return new MaryResponse(null, null, true);
         }
-        else if (local_mary.isTextType(local_mary.getOutputType())) // Text
+        else if (localMary.isTextType(localMary.getOutputType())) // Text
         {
             // Deal with input type
-            if (local_mary.isTextType(local_mary.getInputType())) // Text 
+            if (localMary.isTextType(localMary.getInputType())) // Text 
             {
-                return new MaryResponse(local_mary.generateText(input), null, false);
+                return new MaryResponse(localMary.generateText(input), null, false);
             }
-            else if (local_mary.isXMLType(local_mary.getOutputType())) // XML
+            else if (localMary.isXMLType(localMary.getOutputType())) // XML
             {
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 
@@ -470,7 +470,7 @@ public class MaryController
                 
                 Document in_xml = builder.parse(new ByteArrayInputStream(input.getBytes()));
                 
-                return new MaryResponse(local_mary.generateText(in_xml), null, false);
+                return new MaryResponse(localMary.generateText(in_xml), null, false);
             }
             else
             {
@@ -478,16 +478,16 @@ public class MaryController
             }
             
         }
-        else if (local_mary.isXMLType(local_mary.getOutputType())) // XML
+        else if (localMary.isXMLType(localMary.getOutputType())) // XML
         {
             // Deal with input type
-            if (local_mary.isTextType(local_mary.getInputType())) // Text 
+            if (localMary.isTextType(localMary.getInputType())) // Text 
             {
                 
                 //DomUtils.document2String());
-                return new MaryResponse(XML2Data.convertXML(local_mary.generateXML(input)), null, false);
+                return new MaryResponse(XML2Data.convertXML(localMary.generateXML(input)), null, false);
             }
-            else if (local_mary.isXMLType(local_mary.getOutputType())) // XML
+            else if (localMary.isXMLType(localMary.getOutputType())) // XML
             {
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 
@@ -497,7 +497,7 @@ public class MaryController
                 Document in_xml = builder.parse(new ByteArrayInputStream(input.getBytes()));
                
                 // DomUtils.document2String();
-                return new MaryResponse(XML2Data.convertXML(local_mary.generateXML(in_xml)), null, false);
+                return new MaryResponse(XML2Data.convertXML(localMary.generateXML(in_xml)), null, false);
             }
             else
             {
@@ -529,10 +529,10 @@ public class MaryController
     public MaryResponse synthesize(@RequestParam(value="text") String text)
         throws Exception
     {
-        String output_type = local_mary.getOutputType();
-        local_mary.setOutputType("AUDIO");
-        ais = local_mary.generateAudio(text);
-        local_mary.setOutputType(output_type);
+        String output_type = localMary.getOutputType();
+        localMary.setOutputType("AUDIO");
+        ais = localMary.generateAudio(text);
+        localMary.setOutputType(output_type);
         return new MaryResponse(null, null, true);
     }
 
