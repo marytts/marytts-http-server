@@ -17,26 +17,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package marytts.http;
+package marytts.http.response;
 
-import java.util.List;
-import java.io.IOException;
-
-
-public class MaryListResponse
+/**
+ *  Standard mary response model wrapper
+ *
+ */
+public class MaryResponse
 {
-    private final List<String> result; /*< The result list */
+    private final Object result; /*< The result value */
     private final String log; /*< The server log */
     private final boolean synth_done; /*< Status to indicate in the synthesis is achieved or not */
 
     /**
      *  Constructor which initialise the data structure
      *
-     *     @param result the result list
+     *     @param result the result value
      *     @param log the server log
      *     @param synth_done the status of the synthesis
      */
-    public MaryListResponse(List<String> result, String log, boolean synth_done)
+    public MaryResponse(Object result, String log, boolean synth_done)
     {
         this.result = result;
         this.log = log;
@@ -44,11 +44,11 @@ public class MaryListResponse
     }
 
     /**
-     *  Accessor to get the result list
+     *  Accessor to get the result value
      *
-     *     @return the result list
+     *     @return the result json object
      */
-    public List<String> getResult()
+    public Object getResult()
     {
         return result;
     }
@@ -66,11 +66,10 @@ public class MaryListResponse
     /**
      *  Accessor to get the synthesis status
      *
-     *     @return the log string
+     *     @return true if a synthesis is achieved
      */
     public boolean isSynthDone()
     {
         return synth_done;
     }
-
 }

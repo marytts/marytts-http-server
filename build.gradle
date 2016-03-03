@@ -32,16 +32,19 @@ targetCompatibility = 1.7
 
 
 configurations {
-  jaxDoclet
+    jaxDoclet
 }
 
-def maryttsVersion = '6.0-SNAPSHOT'
+def maryttsVersion = '5.2-SNAPSHOT'
 
 dependencies {
     compile group:"org.json", name:"json", version:"20090211"
     compile("org.springframework.boot:spring-boot-starter-web") {
         exclude module: "logback-classic"
+        exclude module: 'org.springframework.boot:spring-boot-starter-logging'
     }
+    compile ('org.springframework.boot:spring-boot-starter-log4j')
+    
     testCompile("junit:junit")
 
     // compile group: 'de.dfki.mary', name: 'marytts-hsmm', version: maryttsVersion

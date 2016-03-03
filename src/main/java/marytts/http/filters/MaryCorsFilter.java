@@ -18,7 +18,7 @@
  *
  */
 
-package marytts.http;
+package marytts.http.filters;
 
 /* IO */
 import java.io.IOException;
