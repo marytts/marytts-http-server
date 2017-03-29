@@ -29,8 +29,9 @@ import org.springframework.context.annotation.ImportResource;
 @ImportResource({"classpath*:applicationContext.xml"})
 public class Server {
 
-    public static void main(String[] args) throws Exception {
-
+    public static void main(String[] args)
+        throws Exception
+    {
         SpringApplication.run(Server.class, args);
     }
 }
