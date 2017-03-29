@@ -27,15 +27,15 @@ repositories {
 }
 
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 
 configurations {
     jaxDoclet
 }
 
-def maryttsVersion = '5.2-SNAPSHOT'
+def maryttsVersion = '6.0.1-SNAPSHOT'
 
 dependencies {
     compile group:"org.json", name:"json", version:"20090211"
@@ -44,31 +44,22 @@ dependencies {
         exclude module: 'org.springframework.boot:spring-boot-starter-logging'
     }
     compile ('org.springframework.boot:spring-boot-starter-log4j')
-    
+
     testCompile("junit:junit")
 
     // compile group: 'de.dfki.mary', name: 'marytts-hsmm', version: maryttsVersion
-    compile group: 'de.dfki.mary', name: 'marytts-runtime', version: maryttsVersion
+    compile group: 'de.dfki.mary', name: 'marytts-common', version: maryttsVersion
     ['en'].each { locale ->
         runtime group: 'de.dfki.mary', name: "marytts-lang-$locale", version: maryttsVersion
     }
 
     // testCompile group: 'de.dfki.mary', name: 'marytts-hsmm', version: maryttsVersion
-    testCompile group: 'de.dfki.mary', name: 'marytts-runtime', version: maryttsVersion
+    testCompile group: 'de.dfki.mary', name: 'marytts-common', version: maryttsVersion
     ['en'].each { locale ->
         testCompile group: 'de.dfki.mary', name: "marytts-lang-$locale", version: maryttsVersion
     }
-
-    ['voice-cmu-slt-hsmm'].each { voice ->
-        compile group: 'de.dfki.mary', name: voice, version: maryttsVersion
-    }
-
     runtime fileTree(dir: 'installed', include: '*.jar')
     // runtime fileTree(dir: 'hts_test', include: '*.jar')
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.7'
 }
 
 
