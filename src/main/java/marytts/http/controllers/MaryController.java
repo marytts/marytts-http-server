@@ -130,36 +130,10 @@ public class MaryController
 		return currentState;
 	}
 
-	/**
-	 * Add jars to classpath. Normally this is called from startup().
-	 *
-	 * @throws Exception
-	 *             Exception
-	 */
-	protected static void addJarsToClasspath() throws Exception {
-		if (true)
-			return;
-		// TODO: clean this up when the new modularity mechanism is in place
-		if (jarsAdded)
-			return; // have done this already
-		File jarDir = new File(MaryProperties.maryBase() + "/java");
-		File[] jarFiles = jarDir.listFiles(new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				return name.endsWith(".jar");
-			}
-		});
-		assert jarFiles != null;
-		URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-		Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
-		method.setAccessible(true);
-		for (int i = 0; i < jarFiles.length; i++) {
-			URL jarURL = new URL("file:" + jarFiles[i].getPath());
-			method.invoke(sysloader, new Object[] { jarURL });
-		}
-		jarsAdded = true;
-	}
 
-	private static void startModules() throws ClassNotFoundException, InstantiationException, Exception {
+	private static void startModules()
+        throws ClassNotFoundException, InstantiationException, Exception
+    {
 		for (String moduleClassName : MaryProperties.moduleInitInfo()) {
 			MaryModule m = ModuleRegistry.instantiateModule(moduleClassName);
 			// Partially fill module repository here;
@@ -213,31 +187,14 @@ public class MaryController
 	 * @throws Exception
 	 *             Exception
 	 */
-	public static void startup() throws Exception {
-		startup(true);
-	}
+	public static void startup()
+        throws Exception
+    {
 
-	/**
-	 * Start the MARY system and all modules. This method must be called once before any calls to
-	 * {@link #process(String input, String inputTypeName, String outputTypeName, String localeString, String audioTypeName, String voiceName, String style, String effects, String outputTypeParams, OutputStream output)}
-	 * are possible.
-	 *
-	 * @param addJarsToClasspath
-	 *            if true, the method will dynamically extend the classpath to all jar files in MARY_BASE/java/*.jar; if false,
-	 *            the classpath will remain unchanged.
-	 * @throws IllegalStateException
-	 *             if the system is not offline.
-	 * @throws Exception
-	 *             Exception
-	 */
-	public static void startup(boolean addJarsToClasspath) throws Exception {
 		if (currentState != STATE_OFF)
 			throw new IllegalStateException("Cannot start system: it is not offline");
 		currentState = STATE_STARTING;
 
-		if (addJarsToClasspath) {
-			addJarsToClasspath();
-		}
 
 		configureLogging();
 
@@ -311,54 +268,9 @@ public class MaryController
 	 * @throws IOException
 	 *             IOException
 	 */
-	private static void configureLogging() throws MaryConfigurationException, IOException {
-		if (!MaryUtils.isLog4jConfigured()) { // maybe log4j has been externally configured already?
-			// Configure logging:
-			/*
-			 * logger = MaryUtils.getLogger("main");
-			 * Logger.getRootLogger().setLevel(Level.toLevel(MaryProperties.needProperty("log.level"))); PatternLayout layout =
-			 * new PatternLayout("%d [%t] %-5p %-10c %m\n"); File logFile = null; if
-			 * (MaryProperties.needAutoBoolean("log.tofile")) { String filename = MaryProperties.getFilename("log.filename",
-			 * "mary.log"); logFile = new File(filename); File parentFile = logFile.getParentFile(); // prevent a
-			 * NullPointerException in the following conditional if the user has requested a non-existing, *relative* log filename
-			 * if (parentFile == null) { parentFile = new File(logFile.getAbsolutePath()).getParentFile(); } if
-			 * (!(logFile.exists()&&logFile.canWrite() // exists and writable || parentFile.exists() && parentFile.canWrite())) {
-			 * // parent exists and writable // cannot write to file
-			 * System.err.print("\nCannot write to log file '"+filename+"' -- "); File fallbackLogFile = new
-			 * File(System.getProperty("user.home")+"/mary.log"); if (fallbackLogFile.exists()&&fallbackLogFile.canWrite() //
-			 * exists and writable || fallbackLogFile.exists()&&fallbackLogFile.canWrite()) { // parent exists and writable //
-			 * fallback log file is OK System.err.println("will log to '"+fallbackLogFile.getAbsolutePath()+"' instead."); logFile
-			 * = fallbackLogFile; } else { // cannot write to fallback log either
-			 * System.err.println("will log to standard output instead."); logFile = null; } } if (logFile != null &&
-			 * logFile.exists()) logFile.delete(); } if (logFile != null) { BasicConfigurator.configure(new FileAppender(layout,
-			 * logFile.getAbsolutePath())); } else { BasicConfigurator.configure(new WriterAppender(layout, System.err)); }
-			 */
-			Properties logprops = new Properties();
-			InputStream propIS = new BufferedInputStream(MaryProperties.needStream("log.config"));
-			logprops.load(propIS);
-			propIS.close();
-			// Now replace MARY_BASE with the install location of MARY in every property:
-			for (Object key : logprops.keySet()) {
-				String val = (String) logprops.get(key);
-				if (val.contains("MARY_BASE")) {
-					String maryBase = MaryProperties.maryBase();
-					if (maryBase.contains("\\")) {
-						maryBase = maryBase.replaceAll("\\\\", "/");
-					}
-					val = val.replaceAll("MARY_BASE", maryBase);
-					logprops.put(key, val);
-				}
-			}
-			// And allow MaryProperties (and thus System properties) to overwrite the single entry
-			// log4j.logger.marytts:
-			String loggerMaryttsKey = "log4j.logger.marytts";
-			String loggerMaryttsValue = MaryProperties.getProperty(loggerMaryttsKey);
-			if (loggerMaryttsValue != null) {
-				logprops.setProperty(loggerMaryttsKey, loggerMaryttsValue);
-			}
-			PropertyConfigurator.configure(logprops);
-		}
-
+	private static void configureLogging()
+        throws MaryConfigurationException, IOException
+    {
 		logger = MaryUtils.getLogger("main");
 	}
 
@@ -465,13 +377,21 @@ public class MaryController
 		if (currentState != STATE_RUNNING)
 			throw new IllegalStateException("MARY system is not running");
 
-		Request request = new Request(configuration, input_data);
-		request.process();
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-		request.writeOutputData(output);
+        Exception save_ex = null;
+        try {
+            Request request = new Request(configuration, input_data);
+            request.process();
 
-        return new MaryResponse(output.toString(), null, false);
+            request.writeOutputData(output);
+        }
+        catch (Exception ex)
+        {
+            save_ex = ex;
+        }
+
+        return new MaryResponse(output.toString(), null, false, save_ex);
 
     }
 
