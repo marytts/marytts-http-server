@@ -391,6 +391,14 @@ public class MaryController
             save_ex = ex;
         }
 
+        while ((save_ex != null) &&
+               (save_ex.getCause() != null) &&
+               (save_ex.getCause() instanceof Exception))
+
+        {
+            save_ex = (Exception) save_ex.getCause();
+        }
+
         return new MaryResponse(output.toString(), null, false, save_ex);
 
     }
