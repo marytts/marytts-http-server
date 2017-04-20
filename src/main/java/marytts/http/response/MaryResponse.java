@@ -19,6 +19,8 @@
  */
 package marytts.http.response;
 
+import marytts.http.models.constants.ResponseType;
+
 /**
  *  Standard mary response model wrapper
  *

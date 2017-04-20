@@ -33,5 +33,8 @@ public class Server {
         throws Exception
     {
         SpringApplication.run(Server.class, args);
+        
+        //startup mary launcher
+        MaryLauncher.getInstance();     //it calls startup() method too.
     }
 }
