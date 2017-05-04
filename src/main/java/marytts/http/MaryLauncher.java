@@ -260,7 +260,8 @@ public class MaryLauncher extends Thread {
      */
     private static void configureLogging()
             throws MaryConfigurationException, IOException {
-        logger = MaryUtils.getLogger("main");
+//        logger = MaryUtils.getLogger("main");
+        logger = Logger.getLogger("maryLogger");
     }
 
     /**
