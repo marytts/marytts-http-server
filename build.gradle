@@ -70,3 +70,10 @@ dependencies {
 //   options.doclet = "com.lunatech.doclets.jax.jaxrs.JAXRSDoclet"
 //   options.addStringOption("jaxrscontext", "http://localhost:8080/myapp")
 // }
+
+//pass agrument to Application class
+bootRun {
+    if ( project.hasProperty('args') ) {
+        args project.args.split('\\s+')
+    }
+}
