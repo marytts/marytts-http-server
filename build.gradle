@@ -4,26 +4,44 @@ buildscript {
         maven {
             url 'https://oss.jfrog.org/artifactory/repo'
         }
+        mavenCentral()
+        jcenter()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.2.3.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.0.RELEASE")
+        //rest docs generation
+        classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
     }
 }
 
 
 apply plugin: 'java'
-// apply plugin: 'eclipse'
-// apply plugin: 'idea'
+//apply plugin: 'eclipse'
+//apply plugin: 'idea'
 apply plugin: 'spring-boot'
+apply plugin: 'org.asciidoctor.convert'
+apply plugin: 'application'
+mainClassName = 'marytts.http.Server'
 
 version '0.1.0-SNAPSHOT'
 status 'integration'
 
+jar {
+      baseName = rootProject.name
+      version = version
+      dependsOn asciidoctor
+      from ("${asciidoctor.outputDir}/html5") {
+          into 'static/docs'
+      }
+ }
+  
 repositories {
     mavenLocal()
     maven {
         url 'https://oss.jfrog.org/artifactory/repo'
     }
+    mavenCentral()
+    jcenter()
 }
 
 
@@ -43,10 +61,8 @@ dependencies {
         exclude module: "logback-classic"
         exclude module: 'org.springframework.boot:spring-boot-starter-logging'
     }
-    compile ('org.springframework.boot:spring-boot-starter-log4j')
-
-    testCompile("junit:junit")
-
+    compile ('org.springframework.boot:spring-boot-starter-log4j2')
+    
     // compile group: 'de.dfki.mary', name: 'marytts-hsmm', version: maryttsVersion
     compile group: 'de.dfki.mary', name: 'marytts-common', version: maryttsVersion
     ['en'].each { locale ->
@@ -60,6 +76,11 @@ dependencies {
     }
     runtime fileTree(dir: 'installed', include: '*.jar')
     // runtime fileTree(dir: 'hts_test', include: '*.jar')
+    
+    //standard spring boot testing framework
+    testCompile("org.springframework.boot:spring-boot-starter-test")
+    //spring REST docs generator
+    testCompile("org.springframework.restdocs:spring-restdocs-mockmvc")
 }
 
 
@@ -76,4 +97,12 @@ bootRun {
     if ( project.hasProperty('args') ) {
         args project.args.split('\\s+')
     }
+}
+
+asciidoctor {
+    sourceDir 'src/main/docs/asciidoc'
+    outputDir "build/asciidoc"
+    dependsOn test
+    attributes \
+      'snippets': file('build/snippets')
 }

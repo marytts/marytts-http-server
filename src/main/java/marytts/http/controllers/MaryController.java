@@ -65,7 +65,7 @@ public class MaryController {
      *************************************************************************
      */
     /**
-     * Method used to set the current locale
+     * Method used to get the current configuration
      *
      * @param locale the new locale to set (format is the standard one like
      * en_US for example)
@@ -105,7 +105,7 @@ public class MaryController {
     @RequestMapping("/setLoggerLevel")
     public void setLoggerLevel(@RequestParam(value = "level") String level)
             throws Exception {
-        throw new UnsupportedOperationException("Not implemented yet !");
+        
     }
 
     /**

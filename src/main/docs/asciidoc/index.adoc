@@ -1,0 +1,136 @@
+= Getting Started With MaryTTS REST Docs
+Atta-Ur-Rehman Shah <attashah@coli.uni-saarland.de> 
+v6.0
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+
+[[introduction]]
+= Introduction
+
+This is the REST documentation for the HTTP Server RESTFUL wrapper of the multilingual open-source Mary 
+ text-to-speech platform (MaryTTS). MaryTTS can be found on https://github.com/marytts/marytts/[this page].
+
+NOTE: This documentation applies to MaryTTS HTTP Server running on local machine (localhost) on port 59125.
+If you are not sure how to run the server, please refer to https://github.com/marytts/marytts-http-server/tree/master[this documentation].
+
+[[overview]]
+= Overview
+A brief overview of HTTP verbs & status codes.
+
+[[overview-http-verbs]]
+== HTTP verbs
+Person-service tries to adhere as closely as possible to standard HTTP and REST conventions in its
+use of HTTP verbs.
+|===
+| Verb | Usage
+
+| `GET`
+| Used to retrieve a resource
+
+| `POST`
+| Used to create a new resource
+
+| `PATCH`
+| Used to update an existing resource, including partial updates
+
+| `PUT`
+| Used to update an existing resource, full updates only
+
+| `DELETE`
+| Used to delete an existing resource
+|===
+
+[[overview-http-status-codes]]
+== HTTP status codes
+Person-service tries to adhere as closely as possible to standard HTTP and REST conventions in its
+use of HTTP status codes.
+
+|===
+| Status code | Usage
+
+| `200 OK`
+| Standard response for successful HTTP requests. The actual response will depend on the request method used.
+In a GET request, the response will contain an entity corresponding to the requested resource.
+In a POST request, the response will contain an entity describing or containing the result of the action.
+
+| `201 Created`
+| The request has been fulfilled and resulted in a new resource being created.
+
+| `204 No Content`
+| The server successfully processed the request, but is not returning any content.
+
+| `400 Bad Request`
+| The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).
+
+| `404 Not Found`
+| The requested resource could not be found but may be available again in the future. Subsequent requests by the client are permissible.
+|===
+
+[[resources]]
+= Resources
+
+[[resources-configuration]]
+== Configuration
+The Configuration resource is used to modify and list the MaryTTS configurations.
+
+[[resource-get-configuration]]
+=== Get configuration
+A `GET` request to get the current configuration
+
+==== HTTP request
+include::{snippets}/get-configuration/http-request.adoc[]
+
+==== HTTPie request
+include::{snippets}/get-configuration/httpie-request.adoc[]
+
+==== Curl request
+include::{snippets}/get-configuration/curl-request.adoc[]
+
+==== HTTP response
+include::{snippets}/get-configuration/http-response.adoc[]
+
+[[resource-set-configuration]]
+=== Set configuration
+A `POST` request to reset the current configuration
+
+include::{snippets}/set-configuration/request-parameters.adoc[]
+
+==== HTTP request
+include::{snippets}/set-configuration/http-request.adoc[]
+
+==== HTTPie request
+include::{snippets}/set-configuration/httpie-request.adoc[]
+
+==== Curl request
+include::{snippets}/set-configuration/curl-request.adoc[]
+
+==== HTTP response
+include::{snippets}/set-configuration/http-response.adoc[]
+
+
+[[resources-logger-level]]
+== Logger Level
+The Logger Level resource is used to modify and list the logging level.
+
+[[resource-set-logger-level]]
+=== Set logger level
+A `GET` request to reset the current logging level
+
+include::{snippets}/set-logger-level/request-parameters.adoc[]
+
+==== HTTP request
+include::{snippets}/set-logger-level/http-request.adoc[]
+
+==== HTTPie request
+include::{snippets}/set-logger-level/httpie-request.adoc[]
+
+==== Curl request
+include::{snippets}/set-logger-level/curl-request.adoc[]
+
+==== HTTP response
+include::{snippets}/set-logger-level/http-response.adoc[]
+
