@@ -19,12 +19,10 @@
  */
 package marytts.http;
 
-import groovy.util.logging.Log4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ImportResource;
 
-@Log4j
 @SpringBootApplication
 @ImportResource({"classpath*:applicationContext.xml"})
 public class Server {

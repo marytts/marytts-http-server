@@ -1,28 +1,19 @@
-// FIXME: add test if voices exist in the class path !
-buildscript {
-    repositories {
-        maven {
-            url 'https://oss.jfrog.org/artifactory/repo'
-        }
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.2.3.RELEASE")
-    }
+plugins {
+    id 'org.springframework.boot' version '1.5.4.RELEASE'
 }
 
 
 apply plugin: 'java'
 // apply plugin: 'eclipse'
 // apply plugin: 'idea'
-apply plugin: 'spring-boot'
 
 version '0.1.0-SNAPSHOT'
 status 'integration'
 
 repositories {
-    mavenLocal()
+    jcenter()
     maven {
-        url 'https://oss.jfrog.org/artifactory/repo'
+        url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
     }
 }
 
@@ -35,6 +26,15 @@ configurations {
     jaxDoclet
 }
 
+configurations.all {
+     resolutionStrategy {
+         dependencySubstitution {
+             force 'org.codehaus.groovy:groovy-all:2.4.4'
+             substitute module('org.slf4j:slf4j-log4j12:1.6.1') with module('org.slf4j:log4j-over-slf4j:1.6.1')
+         }
+     }
+}
+
 def maryttsVersion = '6.0.1-SNAPSHOT'
 
 dependencies {
@@ -43,11 +43,9 @@ dependencies {
         exclude module: "logback-classic"
         exclude module: 'org.springframework.boot:spring-boot-starter-logging'
     }
-    compile ('org.springframework.boot:spring-boot-starter-log4j')
 
     testCompile("junit:junit")
 
-    // compile group: 'de.dfki.mary', name: 'marytts-hsmm', version: maryttsVersion
     compile group: 'de.dfki.mary', name: 'marytts-common', version: maryttsVersion
     ['en'].each { locale ->
         runtime group: 'de.dfki.mary', name: "marytts-lang-$locale", version: maryttsVersion
@@ -61,12 +59,3 @@ dependencies {
     runtime fileTree(dir: 'installed', include: '*.jar')
     // runtime fileTree(dir: 'hts_test', include: '*.jar')
 }
-
-
-// task generateRestApiDocs(type: Javadoc) {
-//   source = sourceSets.main.allJava
-//   destinationDir = reporting.file("rest-api-docs")
-//   options.docletpath = configurations.jaxDoclet.files.asType(List)
-//   options.doclet = "com.lunatech.doclets.jax.jaxrs.JAXRSDoclet"
-//   options.addStringOption("jaxrscontext", "http://localhost:8080/myapp")
-// }
