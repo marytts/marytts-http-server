@@ -12,6 +12,7 @@ status 'integration'
 
 repositories {
     jcenter()
+    mavenLocal()
     maven {
         url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
     }
@@ -39,23 +40,19 @@ def maryttsVersion = '6.0.1-SNAPSHOT'
 
 dependencies {
     compile group:"org.json", name:"json", version:"20090211"
+
+    // Spring part
     compile("org.springframework.boot:spring-boot-starter-web") {
         exclude module: "logback-classic"
         exclude module: 'org.springframework.boot:spring-boot-starter-logging'
     }
 
-    testCompile("junit:junit")
 
+    // MaryTTS part
+    compile group: 'org.m2ci.msp', name:'marytts-tg-serializer', version:'0.5'
     compile group: 'de.dfki.mary', name: 'marytts-common', version: maryttsVersion
     ['en'].each { locale ->
         runtime group: 'de.dfki.mary', name: "marytts-lang-$locale", version: maryttsVersion
     }
 
-    // testCompile group: 'de.dfki.mary', name: 'marytts-hsmm', version: maryttsVersion
-    testCompile group: 'de.dfki.mary', name: 'marytts-common', version: maryttsVersion
-    ['en'].each { locale ->
-        testCompile group: 'de.dfki.mary', name: "marytts-lang-$locale", version: maryttsVersion
-    }
-    runtime fileTree(dir: 'installed', include: '*.jar')
-    // runtime fileTree(dir: 'hts_test', include: '*.jar')
 }
