@@ -37,8 +37,8 @@ http://localhost:59125/docs/index.html
 
 Logging
 -------
-MaryTTS http server uses Log4j for logging. By default, it logs the output to the console. If you want to override the default configuration, you can specify a custom Log4j properties file while starting the server like following:
+MaryTTS http server uses Log4j2 for logging. By default, it logs the output to the console. If you want to override the default configuration, you can specify a custom Log4j2 XML file while starting the server like following:
 ```
-./gradlew bootRun -Pargs="<complete-path-to-properties-file>"
+./gradlew bootRun -Pargs="<complete-path-to-log4j2-xml-file>"
 ```
-[Learn more](https://www.mkyong.com/logging/log4j-log4j-properties-examples/) about creating a valid Log4j properties file or look into `src/main/resources/mary-log4j.properties` for an example.
+[Learn more](http://mycuteblog.com/log4j2-xml-configuration-example/) about creating a valid Log4j2 XML file or look into `src/main/resources/log4j2-test.xml` for an example.

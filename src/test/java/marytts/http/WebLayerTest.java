@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.RestDocumentation;
+import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -57,7 +57,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class WebLayerTest {
 
     @Rule
-    public final RestDocumentation restDocumentation = new RestDocumentation("build/snippets");
+    public final JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation("build/snippets");
 
     @Autowired
     private WebApplicationContext context;
@@ -86,7 +86,7 @@ public class WebLayerTest {
     @Test
     public void setConfiguration() throws Exception {
 
-        this.document.snippets(
+        this.document.document(
                 requestParameters(
                         parameterWithName("configuration").description("The new configuration value")
                 )
@@ -100,7 +100,7 @@ public class WebLayerTest {
     @Test
     public void setLoggerLevel() throws Exception {
         
-        this.document.snippets(
+        this.document.document(
                 requestParameters(
                         parameterWithName("level").description("The new logging level e.g. DEBUG")
                 )

@@ -38,7 +38,8 @@ import marytts.server.MaryProperties;
 import marytts.util.MaryCache;
 import marytts.util.MaryUtils;
 import marytts.util.Pair;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * MaryTTS startup / shutdown script
@@ -261,7 +262,7 @@ public class MaryLauncher extends Thread {
     private static void configureLogging()
             throws MaryConfigurationException, IOException {
 //        logger = MaryUtils.getLogger("main");
-        logger = Logger.getLogger("maryLogger");
+        logger = LogManager.getLogger("mary.http.log");
     }
 
     /**

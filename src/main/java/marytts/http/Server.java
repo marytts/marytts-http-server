@@ -19,16 +19,13 @@
  */
 package marytts.http;
 
-import groovy.util.logging.Log4j;
-import java.io.FileInputStream;
-import java.util.Properties;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.PropertyConfigurator;
+import java.io.File;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ImportResource;
 
-@Log4j
 @SpringBootApplication
 @ImportResource({"classpath*:applicationContext.xml"})
 public class Server {
@@ -39,16 +36,15 @@ public class Server {
         //start the application
         SpringApplication.run(Server.class, args);
 
-        //load log4j properties at runtime
+        //load log4j2 properties at runtime
         if (args.length > 0) {
             try {
-                Properties properties = new Properties();
-                properties.load(new FileInputStream(args[0]));
-                LogManager.resetConfiguration();
-                PropertyConfigurator.configure(properties);
-                System.out.printf("Properties file loaded from %s...", args[0]);
+                LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+                ctx.setConfigLocation(new File(args[0]).toURI());
+                ctx.reconfigure();
+                System.out.println("Loading logging configuration file: " + args[0]);
             } catch (Exception e) {
-                System.out.printf("Cloudn't load properties file from %s: %s", args[0], e.getMessage());
+                System.out.printf("Cloudn't load logging configuration file from %s: %s\n", args[0], e.getMessage());
             }
         }
 
