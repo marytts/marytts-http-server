@@ -85,30 +85,49 @@ dependencies {
 
     //standard spring boot testing framework
     testCompile("org.springframework.boot:spring-boot-starter-test")
+
     //spring REST docs generator
     testCompile("org.springframework.restdocs:spring-restdocs-mockmvc")
 }
 
 
-// task generateRestApiDocs(type: Javadoc) {
-//   source = sourceSets.main.allJava
-//   destinationDir = reporting.file("rest-api-docs")
-//   options.docletpath = configurations.jaxDoclet.files.asType(List)
-//   options.doclet = "com.lunatech.doclets.jax.jaxrs.JAXRSDoclet"
-//   options.addStringOption("jaxrscontext", "http://localhost:8080/myapp")
-// }
 
-//pass agrument to Application class
-bootRun {
-    if ( project.hasProperty('args') ) {
-        args project.args.split('\\s+')
+/**********************************************************************************************
+ ** Formatting
+ ***********************************************************************************************/
+task autoFormatCode() {
+    def config = new File("astyle_marytts.conf")
+    inputs.files config
+    outputs.upToDateWhen { false }
+    doLast {
+        fileTree(dir: '.' , include: '**/*.java').each { java_file ->
+		exec {
+                commandLine "astyle", "--options=$config", java_file
+            }
+        }
     }
 }
 
+
+/**********************************************************************************************
+ ** Documenting
+ ***********************************************************************************************/
 asciidoctor {
     sourceDir 'src/main/docs/asciidoc'
     outputDir "build/asciidoc"
     dependsOn test
     attributes \
       'snippets': file('build/snippets')
+}
+
+
+
+/**********************************************************************************************
+ ** Running
+ ***********************************************************************************************/
+//pass agrument to Application class
+bootRun {
+    if ( project.hasProperty('args') ) {
+        args project.args.split('\\s+')
+    }
 }

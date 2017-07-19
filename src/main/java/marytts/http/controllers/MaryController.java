@@ -73,7 +73,7 @@ public class MaryController {
      */
     @RequestMapping("/getConfiguration")
     public String getConfiguration()
-            throws Exception {
+    throws Exception {
         return "ok";
     }
 
@@ -91,7 +91,7 @@ public class MaryController {
      */
     @RequestMapping(value = "/setConfiguration", method = RequestMethod.POST)
     public void setConfiguration(@RequestParam(value = "configuration") String configuration)
-            throws Exception {
+    throws Exception {
 
     }
 
@@ -104,7 +104,7 @@ public class MaryController {
      */
     @RequestMapping("/setLoggerLevel")
     public void setLoggerLevel(@RequestParam(value = "level") String level)
-            throws Exception {
+    throws Exception {
 
     }
 
@@ -128,8 +128,8 @@ public class MaryController {
      */
     @RequestMapping(value = "/process", method = RequestMethod.POST)
     public MaryResponse process(@RequestParam(value = "input") String input_data,
-            @RequestParam(required = false) String configuration)
-            throws Exception {
+                                @RequestParam(required = false) String configuration)
+    throws Exception {
 
         if (MaryLauncher.getInstance().currentState() != MaryState.STATE_RUNNING) {
             throw new IllegalStateException("MARY system is not running");

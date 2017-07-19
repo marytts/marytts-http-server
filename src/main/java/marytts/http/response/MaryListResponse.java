@@ -22,8 +22,7 @@ package marytts.http.response;
 import java.util.List;
 
 
-public class MaryListResponse
-{
+public class MaryListResponse {
     private final List<String> result; /*< The result list */
     private final String log; /*< The server log */
     private final boolean synth_done; /*< Status to indicate in the synthesis is achieved or not */
@@ -35,8 +34,7 @@ public class MaryListResponse
      *     @param log the server log
      *     @param synth_done the status of the synthesis
      */
-    public MaryListResponse(List<String> result, String log, boolean synth_done)
-    {
+    public MaryListResponse(List<String> result, String log, boolean synth_done) {
         this.result = result;
         this.log = log;
         this.synth_done = synth_done;
@@ -47,8 +45,7 @@ public class MaryListResponse
      *
      *     @return the result list
      */
-    public List<String> getResult()
-    {
+    public List<String> getResult() {
         return result;
     }
 
@@ -57,8 +54,7 @@ public class MaryListResponse
      *
      *     @return the log string
      */
-    public String getLog()
-    {
+    public String getLog() {
         return log;
     }
 
@@ -67,8 +63,7 @@ public class MaryListResponse
      *
      *     @return the log string
      */
-    public boolean isSynthDone()
-    {
+    public boolean isSynthDone() {
         return synth_done;
     }
 

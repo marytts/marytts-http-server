@@ -70,45 +70,45 @@ public class WebLayerTest {
     public void setUp() {
         this.document = document("{method-name}", preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint()));
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.context)
-                .apply(documentationConfiguration(this.restDocumentation).uris()
-                        .withPort(59125))
-                .alwaysDo(this.document)
-                .build();
+                       .apply(documentationConfiguration(this.restDocumentation).uris()
+                              .withPort(59125))
+                       .alwaysDo(this.document)
+                       .build();
     }
 
     @Test
     public void getConfiguration() throws Exception {
         this.mockMvc.perform(get("/getConfiguration").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string("ok"));
+        .andExpect(status().isOk())
+        .andExpect(content().string("ok"));
     }
 
     @Test
     public void setConfiguration() throws Exception {
 
         this.document.document(
-                requestParameters(
-                        parameterWithName("configuration").description("The new configuration value")
-                )
+            requestParameters(
+                parameterWithName("configuration").description("The new configuration value")
+            )
         );
         this.mockMvc.perform(post("/setConfiguration")
-                .param("configuration", "This is a configuration example.")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                             .param("configuration", "This is a configuration example.")
+                             .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
     }
-    
+
     @Test
     public void setLoggerLevel() throws Exception {
-        
+
         this.document.document(
-                requestParameters(
-                        parameterWithName("level").description("The new logging level e.g. DEBUG")
-                )
+            requestParameters(
+                parameterWithName("level").description("The new logging level e.g. DEBUG")
+            )
         );
-        
+
         this.mockMvc.perform(get("/setLoggerLevel")
-                .param("level", "DEBUG")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                             .param("level", "DEBUG")
+                             .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
     }
 }

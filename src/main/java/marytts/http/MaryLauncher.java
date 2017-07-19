@@ -106,7 +106,7 @@ public class MaryLauncher extends Thread {
         logger.info("Stopping mary launcher.");
         try {
             instance.iCanContinue = false;
-            shutdown(); //shutdown marytts 
+            shutdown(); //shutdown marytts
             instance.interrupt();
             instance.join();
         } catch (InterruptedException | NullPointerException e) {
@@ -128,7 +128,7 @@ public class MaryLauncher extends Thread {
     }
 
     private static void startModules()
-            throws ClassNotFoundException, InstantiationException, Exception {
+    throws ClassNotFoundException, InstantiationException, Exception {
         for (String moduleClassName : MaryProperties.moduleInitInfo()) {
             MaryModule m = ModuleRegistry.instantiateModule(moduleClassName);
             // Partially fill module repository here;
@@ -182,7 +182,7 @@ public class MaryLauncher extends Thread {
      * @throws Exception Exception
      */
     public static void startup()
-            throws Exception {
+    throws Exception {
 
         if (currentState != MaryState.STATE_OFF) {
             throw new IllegalStateException("Cannot start system: it is not offline");
@@ -195,8 +195,8 @@ public class MaryLauncher extends Thread {
         logger.info("Specification version " + Version.specificationVersion());
         logger.info("Implementation version " + Version.implementationVersion());
         logger.info("Running on a Java " + System.getProperty("java.version") + " implementation by "
-                + System.getProperty("java.vendor") + ", on a " + System.getProperty("os.name") + " platform ("
-                + System.getProperty("os.arch") + ", " + System.getProperty("os.version") + ")");
+                    + System.getProperty("java.vendor") + ", on a " + System.getProperty("os.name") + " platform ("
+                    + System.getProperty("os.arch") + ", " + System.getProperty("os.version") + ")");
         logger.debug("MARY_BASE: " + MaryProperties.maryBase());
         String[] installedFilenames = new File(MaryProperties.maryBase() + "/installed").list();
         if (installedFilenames == null) {
@@ -260,8 +260,8 @@ public class MaryLauncher extends Thread {
      * @throws IOException IOException
      */
     private static void configureLogging()
-            throws MaryConfigurationException, IOException {
-//        logger = MaryUtils.getLogger("main");
+    throws MaryConfigurationException, IOException {
+        //        logger = MaryUtils.getLogger("main");
         logger = LogManager.getLogger("mary.http.log");
     }
 
