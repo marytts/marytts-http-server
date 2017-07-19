@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="30" status="debug">
+    <!-- monitorInterval: automatic reload every 30sec on changes -->
+    <!-- status: log4j2 internal logging (not for the app) -->
+ 
+    <Properties>
+        <Property name="filename-server-all">logs/mary-all.log</Property>
+        <Property name="filename-server-error">logs/mary-err.log</Property>
+    </Properties>
+ 
+    <Appenders>
+        <!-- the standard-console-appender -->
+        <Console name="appender-console-all" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        </Console>
+ 
+        <!-- the appenders for server 1 -->
+        <File name="appender-mary-all" fileName="${filename-server-all}" append="true">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        </File>
+        <File name="appender-mary-error" fileName="${filename-server-error}" append="true">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        </File>
+    </Appenders>
+ 
+ 
+    <Loggers>
+        <!-- Every configuration must have a root logger. If one is not configured the default root LoggerConfig is ERROR with Console appender attached. -->
+        <Root level="INFO">
+            <AppenderRef ref="appender-console-all" />
+        </Root>
+ 
+        <!-- server1-loggers -->
+        <!-- additivity means, that parent-logger (in every case the root-logger) will also get the chance to log this stuff -->
+        <Logger name="mary.http.log" additivity="TRUE" level="DEBUG">
+            <AppenderRef ref="appender-mary-all" level="DEBUG" />
+            <AppenderRef ref="appender-mary-error" level="ERROR" />
+        </Logger>
+    </Loggers>
+</Configuration>

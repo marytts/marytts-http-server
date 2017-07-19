@@ -1,14 +1,39 @@
-plugins {
-    id 'org.springframework.boot' version '1.5.4.RELEASE'
+// FIXME: add test if voices exist in the class path !
+buildscript {
+    repositories {
+        maven {
+            url 'https://oss.jfrog.org/artifactory/repo'
+        }
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.0.RELEASE")
+        //rest docs generation
+        classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
+    }
 }
 
 
 apply plugin: 'java'
-// apply plugin: 'eclipse'
-// apply plugin: 'idea'
+//apply plugin: 'eclipse'
+//apply plugin: 'idea'
+apply plugin: 'spring-boot'
+apply plugin: 'org.asciidoctor.convert'
+apply plugin: 'application'
+mainClassName = 'marytts.http.Server'
 
 version '0.1.0-SNAPSHOT'
 status 'integration'
+
+jar {
+    baseName = rootProject.name
+    version = version
+    dependsOn asciidoctor
+    from ("${asciidoctor.outputDir}/html5") {
+        into 'static/docs'
+    }
+}
 
 repositories {
     jcenter()
@@ -16,6 +41,8 @@ repositories {
     maven {
         url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
     }
+    mavenCentral()
+    jcenter()
 }
 
 
@@ -26,14 +53,8 @@ targetCompatibility = 1.8
 configurations {
     jaxDoclet
 }
-
 configurations.all {
-     resolutionStrategy {
-         dependencySubstitution {
-             force 'org.codehaus.groovy:groovy-all:2.4.4'
-             substitute module('org.slf4j:slf4j-log4j12:1.6.1') with module('org.slf4j:log4j-over-slf4j:1.6.1')
-         }
-     }
+   exclude group: 'org.slf4j', module: 'slf4j-log4j12'
 }
 
 def maryttsVersion = '6.0.1-SNAPSHOT'
@@ -41,18 +62,53 @@ def maryttsVersion = '6.0.1-SNAPSHOT'
 dependencies {
     compile group:"org.json", name:"json", version:"20090211"
 
-    // Spring part
     compile("org.springframework.boot:spring-boot-starter-web") {
         exclude module: "logback-classic"
-        exclude module: 'org.springframework.boot:spring-boot-starter-logging'
+        exclude module: 'spring-boot-starter-logging'
     }
 
+    compile ('org.springframework.boot:spring-boot-starter-log4j2')
 
-    // MaryTTS part
-    compile group: 'org.m2ci.msp', name:'marytts-tg-serializer', version:'0.5'
+    // compile group: 'de.dfki.mary', name: 'marytts-hsmm', version: maryttsVersion
     compile group: 'de.dfki.mary', name: 'marytts-common', version: maryttsVersion
     ['en'].each { locale ->
         runtime group: 'de.dfki.mary', name: "marytts-lang-$locale", version: maryttsVersion
     }
 
+    // testCompile group: 'de.dfki.mary', name: 'marytts-hsmm', version: maryttsVersion
+    testCompile group: 'de.dfki.mary', name: 'marytts-common', version: maryttsVersion
+    ['en'].each { locale ->
+        testCompile group: 'de.dfki.mary', name: "marytts-lang-$locale", version: maryttsVersion
+    }
+    runtime fileTree(dir: 'installed', include: '*.jar')
+    // runtime fileTree(dir: 'hts_test', include: '*.jar')
+
+    //standard spring boot testing framework
+    testCompile("org.springframework.boot:spring-boot-starter-test")
+    //spring REST docs generator
+    testCompile("org.springframework.restdocs:spring-restdocs-mockmvc")
+}
+
+
+// task generateRestApiDocs(type: Javadoc) {
+//   source = sourceSets.main.allJava
+//   destinationDir = reporting.file("rest-api-docs")
+//   options.docletpath = configurations.jaxDoclet.files.asType(List)
+//   options.doclet = "com.lunatech.doclets.jax.jaxrs.JAXRSDoclet"
+//   options.addStringOption("jaxrscontext", "http://localhost:8080/myapp")
+// }
+
+//pass agrument to Application class
+bootRun {
+    if ( project.hasProperty('args') ) {
+        args project.args.split('\\s+')
+    }
+}
+
+asciidoctor {
+    sourceDir 'src/main/docs/asciidoc'
+    outputDir "build/asciidoc"
+    dependsOn test
+    attributes \
+      'snippets': file('build/snippets')
 }

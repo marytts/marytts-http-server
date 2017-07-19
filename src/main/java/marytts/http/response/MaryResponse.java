@@ -19,6 +19,8 @@
  */
 package marytts.http.response;
 
+import marytts.http.models.constants.ResponseType;
+
 /**
  *  Standard mary response model wrapper
  *
@@ -26,6 +28,7 @@ package marytts.http.response;
 public class MaryResponse
 {
     private final Object result; /*< The result value */
+    private final ResponseType type;
     private final Exception ex;
     private final String log; /*< The server log */
     private final boolean synth_done; /*< Status to indicate in the synthesis is achieved or not */
@@ -36,6 +39,7 @@ public class MaryResponse
      *     @param result the result value
      *     @param log the server log
      *     @param synth_done the status of the synthesis
+     *     @param ex the exception if any
      */
     public MaryResponse(Object result, String log, boolean synth_done, Exception ex)
     {
@@ -43,6 +47,16 @@ public class MaryResponse
         this.log = log;
         this.synth_done = synth_done;
         this.ex = ex;
+        this.type = ex == null ? ResponseType.OK : ResponseType.EXCEPTION;
+    }
+
+    public MaryResponse(Object result, String log, boolean synth_done, Exception ex, ResponseType type)
+    {
+        this.result = result;
+        this.log = log;
+        this.synth_done = synth_done;
+        this.ex = ex;
+        this.type = type;
     }
 
     /**
@@ -78,5 +92,9 @@ public class MaryResponse
     public Exception getException()
     {
         return this.ex;
+    }
+
+    public ResponseType getResponseType(){
+        return type;
     }
 }

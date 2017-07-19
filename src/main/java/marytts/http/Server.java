@@ -19,6 +19,9 @@
  */
 package marytts.http;
 
+import java.io.File;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ImportResource;
@@ -31,5 +34,20 @@ public class Server {
         throws Exception
     {
         SpringApplication.run(Server.class, args);
+
+        //load log4j2 properties at runtime
+        if (args.length > 0) {
+            try {
+                LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+                ctx.setConfigLocation(new File(args[0]).toURI());
+                ctx.reconfigure();
+                System.out.println("Loading logging configuration file: " + args[0]);
+            } catch (Exception e) {
+                System.out.printf("Cloudn't load logging configuration file from %s: %s\n", args[0], e.getMessage());
+            }
+        }
+
+        //startup mary launcher
+        MaryLauncher.getInstance();     //it calls startup() method too.
     }
 }
