@@ -21,10 +21,12 @@ package marytts.http.controllers;
 
 /* RESTFULL / HTTP part */
 import marytts.http.response.MaryResponse;
+import marytts.MaryException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 /* Utils */
 import java.io.ByteArrayOutputStream;
@@ -96,19 +98,6 @@ public class MaryController {
     }
 
     /**
-     * Method used to set the current level of logger
-     *
-     * @param level the name of the new log level
-     * @throws Exception in case of unexisting type or if type is not an output
-     * one
-     */
-    @RequestMapping("/setLoggerLevel")
-    public void setLoggerLevel(@RequestParam(value = "level") String level)
-    throws Exception {
-
-    }
-
-    /**
      * ************************************************************************
      ** Process (except synthesis)
      *************************************************************************
@@ -128,32 +117,20 @@ public class MaryController {
      */
     @RequestMapping(value = "/process", method = RequestMethod.POST)
     public MaryResponse process(@RequestParam(value = "input") String input_data,
-                                @RequestParam(required = false) String configuration)
-    throws Exception {
+                                @RequestParam(required = false) String configuration) throws Exception {
 
         if (MaryLauncher.getInstance().currentState() != MaryState.STATE_RUNNING) {
             throw new IllegalStateException("MARY system is not running");
         }
 
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+	Request request = new Request(configuration, input_data);
         Exception save_ex = null;
-        try {
-            Request request = new Request(configuration, input_data);
-            request.process();
+	Object output = null;
+	request.process();
+	output = request.serializeFinaleUtterance();
 
-            request.writeOutputData(output);
-        } catch (Exception ex) {
-            save_ex = ex;
-        }
-
-        while ((save_ex != null)
-                && (save_ex.getCause() != null)
-                && (save_ex.getCause() instanceof Exception)) {
-            save_ex = (Exception) save_ex.getCause();
-        }
-
-        return new MaryResponse(output.toString(), null, false, save_ex);
-
+        return new MaryResponse(output, null, false, save_ex);
     }
 
     /**

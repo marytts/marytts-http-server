@@ -41,8 +41,6 @@ repositories {
     maven {
         url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
     }
-    mavenCentral()
-    jcenter()
 }
 
 
@@ -81,6 +79,7 @@ dependencies {
         testCompile group: 'de.dfki.mary', name: "marytts-lang-$locale", version: maryttsVersion
     }
     runtime fileTree(dir: 'installed', include: '*.jar')
+    compile group: 'de.dfki.mary', name: 'marytts-pyhts', version: "0.1"
     // runtime fileTree(dir: 'hts_test', include: '*.jar')
 
     //standard spring boot testing framework
