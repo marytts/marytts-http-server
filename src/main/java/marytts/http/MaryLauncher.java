@@ -84,14 +84,15 @@ public class MaryLauncher extends Thread {
      * @return
      */
     public static synchronized MaryLauncher getInstance() {
-        if (instance == null) {
-            instance = new MaryLauncher();
-            instance.start();   //startup marytts
-        }
         try {
-            startup();
+	    if (instance == null) {
+		instance = new MaryLauncher();
+		instance.start();   //startup marytts
+		startup();
+	    }
+
         } catch (Exception ex) {
-            logger.error("Error while starting mary launcher startup().");
+            logger.error("Error while starting mary launcher startup():" + ex);
         }
         return instance;
     }
@@ -110,7 +111,7 @@ public class MaryLauncher extends Thread {
             instance.interrupt();
             instance.join();
         } catch (InterruptedException | NullPointerException e) {
-            logger.error("Error stopping mary launcher shutdown().");
+            logger.error("Error stopping mary launcher shutdown():" + e);
         }
     }
 
