@@ -26,7 +26,7 @@
  
     <Loggers>
         <!-- Every configuration must have a root logger. If one is not configured the default root LoggerConfig is ERROR with Console appender attached. -->
-        <Root level="INFO">
+        <Root level="WARNING">
             <AppenderRef ref="appender-console-all" />
         </Root>
  
