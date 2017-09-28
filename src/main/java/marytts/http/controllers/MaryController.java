@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.io.ByteArrayOutputStream;
 import marytts.http.MaryLauncher;
 import marytts.http.models.constants.MaryState;
-import marytts.server.Request;
+import marytts.runutils.Request;
 
 
 /**

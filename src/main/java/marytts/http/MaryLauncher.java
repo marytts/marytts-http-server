@@ -33,7 +33,6 @@ import marytts.exceptions.MaryConfigurationException;
 import marytts.http.models.constants.MaryState;
 import marytts.modules.MaryModule;
 import marytts.modules.ModuleRegistry;
-import marytts.server.EnvironmentChecks;
 import marytts.config.MaryProperties;
 import marytts.util.MaryCache;
 import marytts.util.MaryUtils;
@@ -237,9 +236,6 @@ public class MaryLauncher extends Thread {
         } catch (Exception e) {
             // Not xalan, no version number
         }
-
-        // Essential environment checks:
-        EnvironmentChecks.check();
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
