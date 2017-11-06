@@ -6,7 +6,7 @@
             http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd">
 
     <!--create LocalMaryInterface for dependency injection-->
-    <bean id="localMary" class="marytts.LocalMaryInterface" scope="session">
+    <bean id="localMary" class="marytts.runutils.LocalMaryInterface" scope="session">
         <aop:scoped-proxy/>
     </bean>
              

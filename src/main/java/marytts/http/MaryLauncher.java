@@ -33,9 +33,7 @@ import marytts.exceptions.MaryConfigurationException;
 import marytts.http.models.constants.MaryState;
 import marytts.modules.MaryModule;
 import marytts.modules.ModuleRegistry;
-import marytts.server.EnvironmentChecks;
 import marytts.config.MaryProperties;
-import marytts.util.MaryCache;
 import marytts.util.MaryUtils;
 import marytts.util.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -136,14 +134,13 @@ public class MaryLauncher extends Thread {
             // TODO: voice-specific entries will be added when each voice is loaded.
             ModuleRegistry.registerModule(m, m.getLocale());
         }
-        ModuleRegistry.setRegistrationComplete();
 
         List<Pair<MaryModule, Long>> startupTimes = new ArrayList<Pair<MaryModule, Long>>();
 
         // Separate loop for startup allows modules to cross-reference to each
         // other via Mary.getModule(Class) even if some have not yet been
         // started.
-        for (MaryModule m : ModuleRegistry.getAllModules()) {
+        for (MaryModule m : ModuleRegistry.listRegisteredModules()) {
             // Only start the modules here if in server mode:
             if ((!MaryProperties.getProperty("server").equals("commandline"))
                     && m.getState() == MaryModule.MODULE_OFFLINE) {
@@ -171,17 +168,6 @@ public class MaryLauncher extends Thread {
         }
     }
 
-    /**
-     * Start the MARY system and all modules. This method must be called once
-     * before any calls to
-     * {@link #process(String input, String inputTypeName, String outputTypeName, String localeString, String audioTypeName, String voiceName, String style, String effects, String outputTypeParams, OutputStream output)}
-     * are possible. The method will dynamically extend the classpath to all jar
-     * files in MARY_BASE/java/*.jar. Use <code>startup(false)</code> if you do
-     * not want to automatically extend the classpath in this way.
-     *
-     * @throws IllegalStateException if the system is not offline.
-     * @throws Exception Exception
-     */
     public static void startup()
     throws Exception {
 
@@ -196,9 +182,11 @@ public class MaryLauncher extends Thread {
         logger.info("Specification version " + Version.specificationVersion());
         logger.info("Implementation version " + Version.implementationVersion());
         logger.info("Running on a Java " + System.getProperty("java.version") + " implementation by "
-                    + System.getProperty("java.vendor") + ", on a " + System.getProperty("os.name") + " platform ("
+                    + System.getProperty("java.vendor") + ", on a "
+		    + System.getProperty("os.name") + " platform ("
                     + System.getProperty("os.arch") + ", " + System.getProperty("os.version") + ")");
         logger.debug("MARY_BASE: " + MaryProperties.maryBase());
+
         String[] installedFilenames = new File(MaryProperties.maryBase() + "/installed").list();
         if (installedFilenames == null) {
             logger.debug("The installed/ folder does not exist.");
@@ -229,17 +217,6 @@ public class MaryLauncher extends Thread {
         for (Object key : new TreeSet<Object>(System.getProperties().keySet())) {
             logger.debug(key + " = " + System.getProperties().get(key));
         }
-
-        try {
-            // Nov 2009, Marc: This causes "[Deprecated] Xalan: org.apache.xalan.Version" to be written to the console.
-            // Class xalanVersion = Class.forName("org.apache.xalan.Version");
-            // logger.debug(xalanVersion.getMethod("getVersion").invoke(null));
-        } catch (Exception e) {
-            // Not xalan, no version number
-        }
-
-        // Essential environment checks:
-        EnvironmentChecks.check();
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
@@ -278,18 +255,9 @@ public class MaryLauncher extends Thread {
         currentState = MaryState.STATE_SHUTTING_DOWN;
         logger.info("Shutting down modules...");
         // Shut down modules:
-        for (MaryModule m : ModuleRegistry.getAllModules()) {
+        for (MaryModule m : ModuleRegistry.listRegisteredModules()) {
             if (m.getState() == MaryModule.MODULE_RUNNING) {
                 m.shutdown();
-            }
-        }
-
-        if (MaryCache.haveCache()) {
-            MaryCache cache = MaryCache.getCache();
-            try {
-                cache.shutdown();
-            } catch (SQLException e) {
-                logger.warn("Cannot shutdown cache: ", e);
             }
         }
         logger.info("Shutdown complete.");
