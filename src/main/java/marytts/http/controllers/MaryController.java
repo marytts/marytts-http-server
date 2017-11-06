@@ -32,8 +32,17 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.io.ByteArrayOutputStream;
 import marytts.http.MaryLauncher;
 import marytts.http.models.constants.MaryState;
-import marytts.server.Request;
+import marytts.runutils.Request;
 
+import org.apache.logging.log4j.core.filter.ThresholdFilter;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.appender.OutputStreamAppender;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.layout.PatternLayout;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Mary RESTFUL controller class
@@ -44,7 +53,7 @@ import marytts.server.Request;
 @RestController
 // @Scope("session")
 public class MaryController {
-
+    private static final AtomicInteger counter = new AtomicInteger();
 
     // @Autowired
     /**
@@ -123,19 +132,35 @@ public class MaryController {
             throw new IllegalStateException("MARY system is not running");
         }
 
+	int id = counter.incrementAndGet();
 
-	Request request = new Request(configuration, input_data);
         Exception save_ex = null;
 	Object output = null;
-	request.process();
-	output = request.serializeFinaleUtterance();
 
-        return new MaryResponse(output, null, false, save_ex);
+	// Configure the appender to get the logging part redirected to a string
+	Level level = Level.WARN;
+
+	ByteArrayOutputStream baos_logger = new ByteArrayOutputStream();
+	ThresholdFilter threshold_filter = ThresholdFilter.createFilter(level, null, null);
+	LoggerContext context = LoggerContext.getContext(false);
+        Configuration config = context.getConfiguration();
+        PatternLayout layout = PatternLayout.createDefaultLayout(config);
+	Appender appender = OutputStreamAppender.createAppender(layout, threshold_filter, baos_logger,
+								"client " + (new Integer(id)).toString(),
+								false, true);
+        appender.start();
+
+	try {
+	    Request request = new Request(appender, configuration, input_data);
+	    request.process();
+	    output = request.serializeFinaleUtterance();
+	} catch (Exception ex) {
+	    save_ex = ex;
+	}
+
+	String log_result = baos_logger.toString("UTF-8");
+	appender.stop();
+
+        return new MaryResponse(output, log_result, false, save_ex);
     }
-
-    /**
-     * ************************************************************************
-     ** Synthesis
-     *************************************************************************
-     */
 }

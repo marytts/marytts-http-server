@@ -28,13 +28,15 @@ import org.springframework.context.annotation.ImportResource;
 
 @SpringBootApplication
 @ImportResource({"classpath*:applicationContext.xml"})
+
+
 public class Server {
 
     public static void main(String[] args)
-    throws Exception {
+	throws Exception {
         SpringApplication.run(Server.class, args);
 
-        //load log4j2 properties at runtime
+        // load log4j2 properties at runtime
         if (args.length > 0) {
             try {
                 LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
