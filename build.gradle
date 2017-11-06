@@ -69,17 +69,19 @@ dependencies {
 
     // compile group: 'de.dfki.mary', name: 'marytts-hsmm', version: maryttsVersion
     compile group: 'de.dfki.mary', name: 'marytts-common', version: maryttsVersion
-    ['en'].each { locale ->
+    ['de', 'en', 'ru'].each { locale ->
         runtime group: 'de.dfki.mary', name: "marytts-lang-$locale", version: maryttsVersion
     }
 
     // testCompile group: 'de.dfki.mary', name: 'marytts-hsmm', version: maryttsVersion
     testCompile group: 'de.dfki.mary', name: 'marytts-common', version: maryttsVersion
-    ['en'].each { locale ->
+    ['de', 'en', 'ru', ].each { locale ->
         testCompile group: 'de.dfki.mary', name: "marytts-lang-$locale", version: maryttsVersion
     }
     runtime fileTree(dir: 'installed', include: '*.jar')
-    compile group: 'de.dfki.mary', name: 'marytts-pyhts', version: "0.1"
+
+    // FIXME: ignore marytts-pyhts for now
+    // compile group: 'de.dfki.mary', name: 'marytts-pyhts', version: "0.1"
     // runtime fileTree(dir: 'hts_test', include: '*.jar')
 
     //standard spring boot testing framework

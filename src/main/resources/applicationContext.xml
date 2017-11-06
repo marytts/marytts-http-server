@@ -9,5 +9,5 @@
     <bean id="localMary" class="marytts.runutils.LocalMaryInterface" scope="session">
         <aop:scoped-proxy/>
     </bean>
-             
+
 </beans>
