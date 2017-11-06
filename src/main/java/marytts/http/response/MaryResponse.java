@@ -27,8 +27,9 @@ import marytts.http.models.constants.ResponseType;
  */
 public class MaryResponse {
     private final Object result; /*< The result value */
-    private final ResponseType type;
-    private final Exception ex;
+    private final ResponseType type; /*< The type of the response (OK, EXCEPTION, ...) */
+    private final Exception exception; /*< The exception if one happened */
+    private final String exception_class; /*< The exception class name */
     private final String log; /*< The server log */
     private final boolean synth_done; /*< Status to indicate in the synthesis is achieved or not */
 
@@ -44,16 +45,12 @@ public class MaryResponse {
         this.result = result;
         this.log = log;
         this.synth_done = synth_done;
-        this.ex = ex;
+        this.exception = ex;
+	if (ex != null)
+	    this.exception_class = exception.getClass().getName();
+	else
+	    this.exception_class = null;
         this.type = ex == null ? ResponseType.OK : ResponseType.EXCEPTION;
-    }
-
-    public MaryResponse(Object result, String log, boolean synth_done, Exception ex, ResponseType type) {
-        this.result = result;
-        this.log = log;
-        this.synth_done = synth_done;
-        this.ex = ex;
-        this.type = type;
     }
 
     /**
@@ -77,16 +74,35 @@ public class MaryResponse {
     /**
      *  Accessor to get the synthesis status
      *
-     *     @return true if a synthesis is achieved
+     *  @return true if a synthesis is achieved
      */
     public boolean isSynthDone() {
         return synth_done;
     }
 
+    /**
+     *  Accessor to get the exception value
+     *
+     *  @return the exception value
+     */
     public Exception getException() {
-        return this.ex;
+        return this.exception;
     }
 
+    /**
+     *  Accessor to get the exception class name
+     *
+     *  @return the exception class name
+     */
+    public String getExceptionClass() {
+        return this.exception_class;
+    }
+
+    /**
+     *  Accessor to get the response type
+     *
+     *  @return the type of response
+     */
     public ResponseType getResponseType() {
         return type;
     }
