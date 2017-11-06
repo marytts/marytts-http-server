@@ -33,7 +33,7 @@ import org.springframework.context.annotation.ImportResource;
 public class Server {
 
     public static void main(String[] args)
-	throws Exception {
+    throws Exception {
         SpringApplication.run(Server.class, args);
 
         // load log4j2 properties at runtime

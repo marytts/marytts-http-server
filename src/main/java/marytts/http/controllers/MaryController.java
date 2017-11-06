@@ -132,34 +132,34 @@ public class MaryController {
             throw new IllegalStateException("MARY system is not running");
         }
 
-	int id = counter.incrementAndGet();
+        int id = counter.incrementAndGet();
 
         Exception save_ex = null;
-	Object output = null;
+        Object output = null;
 
-	// Configure the appender to get the logging part redirected to a string
-	Level level = Level.WARN;
+        // Configure the appender to get the logging part redirected to a string
+        Level level = Level.WARN;
 
-	ByteArrayOutputStream baos_logger = new ByteArrayOutputStream();
-	ThresholdFilter threshold_filter = ThresholdFilter.createFilter(level, null, null);
-	LoggerContext context = LoggerContext.getContext(false);
+        ByteArrayOutputStream baos_logger = new ByteArrayOutputStream();
+        ThresholdFilter threshold_filter = ThresholdFilter.createFilter(level, null, null);
+        LoggerContext context = LoggerContext.getContext(false);
         Configuration config = context.getConfiguration();
         PatternLayout layout = PatternLayout.createDefaultLayout(config);
-	Appender appender = OutputStreamAppender.createAppender(layout, threshold_filter, baos_logger,
-								"client " + (new Integer(id)).toString(),
-								false, true);
+        Appender appender = OutputStreamAppender.createAppender(layout, threshold_filter, baos_logger,
+                            "client " + (new Integer(id)).toString(),
+                            false, true);
         appender.start();
 
-	try {
-	    Request request = new Request(appender, configuration, input_data);
-	    request.process();
-	    output = request.serializeFinaleUtterance();
-	} catch (Exception ex) {
-	    save_ex = ex;
-	}
+        try {
+            Request request = new Request(appender, configuration, input_data);
+            request.process();
+            output = request.serializeFinaleUtterance();
+        } catch (Exception ex) {
+            save_ex = ex;
+        }
 
-	String log_result = baos_logger.toString("UTF-8");
-	appender.stop();
+        String log_result = baos_logger.toString("UTF-8");
+        appender.stop();
 
         return new MaryResponse(output, log_result, false, save_ex);
     }

@@ -46,10 +46,11 @@ public class MaryResponse {
         this.log = log;
         this.synth_done = synth_done;
         this.exception = ex;
-	if (ex != null)
-	    this.exception_class = exception.getClass().getName();
-	else
-	    this.exception_class = null;
+        if (ex != null) {
+            this.exception_class = exception.getClass().getName();
+        } else {
+            this.exception_class = null;
+        }
         this.type = ex == null ? ResponseType.OK : ResponseType.EXCEPTION;
     }
 

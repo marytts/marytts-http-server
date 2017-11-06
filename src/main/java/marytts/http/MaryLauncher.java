@@ -83,11 +83,11 @@ public class MaryLauncher extends Thread {
      */
     public static synchronized MaryLauncher getInstance() {
         try {
-	    if (instance == null) {
-		instance = new MaryLauncher();
-		instance.start();   //startup marytts
-		startup();
-	    }
+            if (instance == null) {
+                instance = new MaryLauncher();
+                instance.start();   //startup marytts
+                startup();
+            }
 
         } catch (Exception ex) {
             logger.error("Error while starting mary launcher startup():" + ex);
@@ -183,7 +183,7 @@ public class MaryLauncher extends Thread {
         logger.info("Implementation version " + Version.implementationVersion());
         logger.info("Running on a Java " + System.getProperty("java.version") + " implementation by "
                     + System.getProperty("java.vendor") + ", on a "
-		    + System.getProperty("os.name") + " platform ("
+                    + System.getProperty("os.name") + " platform ("
                     + System.getProperty("os.arch") + ", " + System.getProperty("os.version") + ")");
         logger.debug("MARY_BASE: " + MaryProperties.maryBase());
 
