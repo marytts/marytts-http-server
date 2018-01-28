@@ -45,6 +45,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.lang.AssertionError;
+
+
 /**
  * MaryTTS web layer testing class
  *
@@ -74,15 +77,24 @@ public class WebLayerTest {
                               .withPort(59125))
                        .alwaysDo(this.document)
                        .build();
+
+
+	MaryLauncher.start();
     }
 
     @Test
-    public void getConfiguration() throws Exception {
-        this.mockMvc.perform(get("/getConfiguration").accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().string("ok"));
+    public void getDefaultConfiguration() throws Exception {
+        this.mockMvc.perform(get("/getDefaultConfiguration").accept(MediaType.APPLICATION_JSON))
+	    .andExpect(status().isOk());
     }
 
+    @Test
+    public void getEnUSConfiguration() throws Exception {
+        this.mockMvc.perform(post("/getConfiguration")
+                             .param("set", "en_US")
+                             .accept(MediaType.APPLICATION_JSON))
+	    .andExpect(status().isOk());
+    }
     @Test
     public void setConfiguration() throws Exception {
 
@@ -97,7 +109,6 @@ public class WebLayerTest {
         .andExpect(status().isOk());
     }
 
-    @Test
     public void setLoggerLevel() throws Exception {
 
         this.document.document(

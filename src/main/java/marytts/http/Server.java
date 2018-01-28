@@ -48,7 +48,7 @@ public class Server {
             }
         }
 
-        //startup mary launcher
-        MaryLauncher.getInstance();     //it calls startup() method too.
+	// Startup
+	MaryLauncher.start();
     }
 }

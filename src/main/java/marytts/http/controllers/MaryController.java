@@ -27,12 +27,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import marytts.modules.ModuleRegistry;
 
 /* Utils */
 import java.io.ByteArrayOutputStream;
 import marytts.http.MaryLauncher;
 import marytts.http.models.constants.MaryState;
 import marytts.runutils.Request;
+import marytts.runutils.Mary;
+import marytts.config.MaryConfigurationFactory;
 
 import org.apache.logging.log4j.core.filter.ThresholdFilter;
 import org.apache.logging.log4j.Level;
@@ -43,6 +46,12 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.util.concurrent.atomic.AtomicInteger;
+
+import java.util.List;
+import java.util.ArrayList;
+import marytts.modules.ModuleRegistry;
+import marytts.modules.MaryModule;
+
 
 /**
  * Mary RESTFUL controller class
@@ -55,6 +64,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MaryController {
     private static final AtomicInteger counter = new AtomicInteger();
 
+    protected Level current_level;
     // @Autowired
     /**
      * Constructor. Just create an interface to MaryTTS
@@ -62,6 +72,7 @@ public class MaryController {
      * @throws Exception in case of the creation of the interface failed
      */
     public MaryController() throws Exception {
+        current_level = Level.WARN;
     }
 
 
@@ -70,6 +81,7 @@ public class MaryController {
      ** Listings
      *************************************************************************
      */
+
     /**
      * ************************************************************************
      ** Getters
@@ -78,14 +90,44 @@ public class MaryController {
     /**
      * Method used to get the current configuration
      *
-     * @param locale the new locale to set (format is the standard one like
-     * en_US for example)
+     * @param set the set identifying the configuration
      * @throws Exception in case of unexisting local
      */
-    @RequestMapping("/getConfiguration")
-    public String getConfiguration()
+    @RequestMapping(value="/getDefaultConfiguration")
+    public String getDefaultConfiguration()
     throws Exception {
-        return "ok";
+        return MaryConfigurationFactory.getDefaultConfiguration().toString();
+    }
+
+
+    /**
+     * Method used to get the current configuration
+     *
+     * @param set the set identifying the configuration
+     * @throws Exception in case of unexisting local
+     */
+    @RequestMapping(value="/getConfiguration", method = RequestMethod.POST)
+    public String getConfiguration(@RequestParam(value = "set") String set)
+    throws Exception {
+        return MaryConfigurationFactory.getConfiguration(set).toString();
+    }
+
+
+
+    /**
+     * Method used to get the current configuration
+     *
+     * @param set the set identifying the configuration
+     * @throws Exception in case of unexisting local
+     */
+    @RequestMapping(value="/listAvailableModules")
+    public List<String> listAvailableModules()
+    throws Exception {
+	ArrayList<String> list_modules = new ArrayList<String>();
+	for (MaryModule m: ModuleRegistry.listRegisteredModules())
+	    list_modules.add(m.getClass().toString());
+
+	return list_modules;
     }
 
     /**
@@ -106,6 +148,19 @@ public class MaryController {
 
     }
 
+    @RequestMapping(value = "/setLoggerLevel", method = RequestMethod.POST)
+    public void  setLoggerLevel(@RequestParam(value = "level") String level) throws Exception {
+	if (level == "ERROR")
+	    current_level = Level.ERROR;
+	else if (level == "WARN")
+	    current_level = Level.WARN;
+	else if (level == "INFO")
+	    current_level = Level.INFO;
+	else if (level == "DEBUG")
+	    current_level = Level.DEBUG;
+	else
+	    throw new Exception("\"" + level + "\" is an unknown level");
+    }
     /**
      * ************************************************************************
      ** Process (except synthesis)
@@ -128,7 +183,7 @@ public class MaryController {
     public MaryResponse process(@RequestParam(value = "input") String input_data,
                                 @RequestParam(required = false) String configuration) throws Exception {
 
-        if (MaryLauncher.getInstance().currentState() != MaryState.STATE_RUNNING) {
+        if (MaryLauncher.getCurrentState() != Mary.STATE_RUNNING) {
             throw new IllegalStateException("MARY system is not running");
         }
 
@@ -137,11 +192,9 @@ public class MaryController {
         Exception save_ex = null;
         Object output = null;
 
-        // Configure the appender to get the logging part redirected to a string
-        Level level = Level.WARN;
 
         ByteArrayOutputStream baos_logger = new ByteArrayOutputStream();
-        ThresholdFilter threshold_filter = ThresholdFilter.createFilter(level, null, null);
+        ThresholdFilter threshold_filter = ThresholdFilter.createFilter(current_level, null, null);
         LoggerContext context = LoggerContext.getContext(false);
         Configuration config = context.getConfiguration();
         PatternLayout layout = PatternLayout.createDefaultLayout(config);
