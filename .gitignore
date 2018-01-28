@@ -8,5 +8,9 @@ lib
 installed
 
 # Spring diverse
+*.log
 logs
 /.nb-gradle/
+
+# Meghanada
+.meghanada/
