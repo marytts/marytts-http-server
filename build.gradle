@@ -36,8 +36,8 @@ jar {
 }
 
 repositories {
-    jcenter()
     mavenLocal()
+    jcenter()
     maven {
         url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
     }
@@ -69,20 +69,20 @@ dependencies {
 
     // compile group: 'de.dfki.mary', name: 'marytts-hsmm', version: maryttsVersion
     compile group: 'de.dfki.mary', name: 'marytts-common', version: maryttsVersion
-    ['de', 'en', 'ru'].each { locale ->
+    ['en'].each { locale ->
         runtime group: 'de.dfki.mary', name: "marytts-lang-$locale", version: maryttsVersion
     }
 
     // testCompile group: 'de.dfki.mary', name: 'marytts-hsmm', version: maryttsVersion
     testCompile group: 'de.dfki.mary', name: 'marytts-common', version: maryttsVersion
-    ['de', 'en', 'ru', ].each { locale ->
+    ['en'].each { locale ->
         testCompile group: 'de.dfki.mary', name: "marytts-lang-$locale", version: maryttsVersion
     }
     runtime fileTree(dir: 'installed', include: '*.jar')
 
-    // FIXME: ignore marytts-pyhts for now
-    // compile group: 'de.dfki.mary', name: 'marytts-pyhts', version: "0.1"
-    // runtime fileTree(dir: 'hts_test', include: '*.jar')
+    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-web
+    compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: '2.6.2'
+
 
     //standard spring boot testing framework
     testCompile("org.springframework.boot:spring-boot-starter-test")
