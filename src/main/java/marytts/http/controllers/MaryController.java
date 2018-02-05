@@ -29,13 +29,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import marytts.modules.ModuleRegistry;
 
+
 /* Utils */
 import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import marytts.http.MaryLauncher;
 import marytts.http.models.constants.MaryState;
 import marytts.runutils.Request;
 import marytts.runutils.Mary;
+import marytts.config.MaryConfiguration;
 import marytts.config.MaryConfigurationFactory;
+import marytts.config.JSONMaryConfigLoader;
 
 import org.apache.logging.log4j.core.filter.ThresholdFilter;
 import org.apache.logging.log4j.Level;
@@ -51,6 +56,7 @@ import java.util.List;
 import java.util.ArrayList;
 import marytts.modules.ModuleRegistry;
 import marytts.modules.MaryModule;
+
 
 
 /**
@@ -193,6 +199,7 @@ public class MaryController {
         Object output = null;
 
 
+
         ByteArrayOutputStream baos_logger = new ByteArrayOutputStream();
         ThresholdFilter threshold_filter = ThresholdFilter.createFilter(current_level, null, null);
         LoggerContext context = LoggerContext.getContext(false);
@@ -204,7 +211,9 @@ public class MaryController {
         appender.start();
 
         try {
-            Request request = new Request(appender, configuration, input_data);
+	    InputStream configuration_stream = new ByteArrayInputStream(configuration.getBytes("UTF-8"));
+	    MaryConfiguration conf_object = (new JSONMaryConfigLoader()).loadConfiguration(configuration_stream);
+            Request request = new Request(appender, conf_object, input_data);
             request.process();
             output = request.serializeFinaleUtterance();
         } catch (Exception ex) {
