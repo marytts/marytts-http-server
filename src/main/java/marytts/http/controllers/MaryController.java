@@ -154,19 +154,6 @@ public class MaryController {
 
     }
 
-    @RequestMapping(value = "/setLoggerLevel", method = RequestMethod.POST)
-    public void  setLoggerLevel(@RequestParam(value = "level") String level) throws Exception {
-	if (level == "ERROR")
-	    current_level = Level.ERROR;
-	else if (level == "WARN")
-	    current_level = Level.WARN;
-	else if (level == "INFO")
-	    current_level = Level.INFO;
-	else if (level == "DEBUG")
-	    current_level = Level.DEBUG;
-	else
-	    throw new Exception("\"" + level + "\" is an unknown level");
-    }
     /**
      * ************************************************************************
      ** Process (except synthesis)
@@ -193,35 +180,27 @@ public class MaryController {
             throw new IllegalStateException("MARY system is not running");
         }
 
-        int id = counter.incrementAndGet();
 
         Exception save_ex = null;
         Object output = null;
-
-
-
-        ByteArrayOutputStream baos_logger = new ByteArrayOutputStream();
-        ThresholdFilter threshold_filter = ThresholdFilter.createFilter(current_level, null, null);
-        LoggerContext context = LoggerContext.getContext(false);
-        Configuration config = context.getConfiguration();
-        PatternLayout layout = PatternLayout.createDefaultLayout(config);
-        Appender appender = OutputStreamAppender.createAppender(layout, threshold_filter, baos_logger,
-                            "client " + (new Integer(id)).toString(),
-                            false, true);
-        appender.start();
+	Request request = null;
 
         try {
 	    InputStream configuration_stream = new ByteArrayInputStream(configuration.getBytes("UTF-8"));
 	    MaryConfiguration conf_object = (new JSONMaryConfigLoader()).loadConfiguration(configuration_stream);
-            Request request = new Request(appender, conf_object, input_data);
+            request = new Request(conf_object, input_data);
             request.process();
             output = request.serializeFinaleUtterance();
         } catch (Exception ex) {
             save_ex = ex;
         }
 
-        String log_result = baos_logger.toString("UTF-8");
-        appender.stop();
+
+	// Retrieve logger if necessary
+        String log_result = "";
+	if (request != null)
+	    log_result = request.getBaosLogger().toString("UTF-8");
+
 
         return new MaryResponse(output, log_result, false, save_ex);
     }
