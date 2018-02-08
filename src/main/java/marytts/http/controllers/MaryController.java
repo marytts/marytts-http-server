@@ -198,9 +198,11 @@ public class MaryController {
 
 	// Retrieve logger if necessary
         String log_result = "";
-	if (request != null)
-	    log_result = request.getBaosLogger().toString("UTF-8");
-
+	if (request != null) {
+	    ByteArrayOutputStream baos_logger = request.getBaosLogger();
+	    if (baos_logger != null)
+		log_result = baos_logger.toString("UTF-8");
+	}
 
         return new MaryResponse(output, log_result, false, save_ex);
     }
