@@ -52,6 +52,8 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import marytts.modules.ModuleRegistry;
@@ -119,6 +121,21 @@ public class MaryController {
     }
 
 
+    /**
+     * Method used to get the current configuration
+     *
+     * @param set the set identifying the configuration
+     * @throws Exception in case of unexisting local
+     */
+    @RequestMapping(value="/listAvailableModules", method = RequestMethod.POST)
+    public List<String> listAvailableModules()
+    throws Exception {
+	ArrayList<String> list_modules = new ArrayList<String>();
+	for (MaryModule m: ModuleRegistry.listRegisteredModules())
+	    list_modules.add(m.getClass().getName());
+
+	return list_modules;
+    }
 
     /**
      * Method used to get the current configuration
@@ -126,14 +143,33 @@ public class MaryController {
      * @param set the set identifying the configuration
      * @throws Exception in case of unexisting local
      */
-    @RequestMapping(value="/listAvailableModules")
-    public List<String> listAvailableModules()
+    @RequestMapping(value="/listAvailableModulesByCategories", method = RequestMethod.POST)
+    public Map<String, List<String>> listAvailableModulesByCategories()
     throws Exception {
-	ArrayList<String> list_modules = new ArrayList<String>();
-	for (MaryModule m: ModuleRegistry.listRegisteredModules())
-	    list_modules.add(m.getClass().toString());
+	Map<String, List<String>> res_map_modules_by_cat = new HashMap<String, List<String>>();
+	Map<String, List<MaryModule>> map_modules_by_cat = ModuleRegistry.listModulesByCategories();
+	for (String cat: map_modules_by_cat.keySet())
+	{
+	    ArrayList<String> list_modules = new ArrayList<String>();
+	    for (MaryModule m: map_modules_by_cat.get(cat))
+		list_modules.add(m.getClass().getName());
+	    res_map_modules_by_cat.put(cat, list_modules);
+	}
 
-	return list_modules;
+	return res_map_modules_by_cat;
+    }
+
+
+    /**
+     * Method used to get the module description
+     *
+     * @param set the set identifying the configuration
+     * @throws Exception in case of unexisting local
+     */
+    @RequestMapping(value="/getDescription", method = RequestMethod.POST)
+    public String getDescription(@RequestParam(value = "module") String module)
+	throws Exception {
+	return ModuleRegistry.getModule(module).getDescription();
     }
 
     /**
