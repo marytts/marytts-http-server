@@ -127,36 +127,27 @@ public class MaryController {
      * @param set the set identifying the configuration
      * @throws Exception in case of unexisting local
      */
-    @RequestMapping(value="/listAvailableModules", method = RequestMethod.POST)
-    public List<String> listAvailableModules()
-    throws Exception {
-	ArrayList<String> list_modules = new ArrayList<String>();
-	for (MaryModule m: ModuleRegistry.listRegisteredModules())
-	    list_modules.add(m.getClass().getName());
-
-	return list_modules;
-    }
-
-    /**
-     * Method used to get the current configuration
-     *
-     * @param set the set identifying the configuration
-     * @throws Exception in case of unexisting local
-     */
     @RequestMapping(value="/listAvailableModulesByCategories", method = RequestMethod.POST)
-    public Map<String, List<String>> listAvailableModulesByCategories()
-    throws Exception {
-	Map<String, List<String>> res_map_modules_by_cat = new HashMap<String, List<String>>();
-	Map<String, List<MaryModule>> map_modules_by_cat = ModuleRegistry.listModulesByCategories();
-	for (String cat: map_modules_by_cat.keySet())
-	{
-	    ArrayList<String> list_modules = new ArrayList<String>();
-	    for (MaryModule m: map_modules_by_cat.get(cat))
-		list_modules.add(m.getClass().getName());
-	    res_map_modules_by_cat.put(cat, list_modules);
-	}
+    public Map< String, Map<String, List<String>> > listAvailableModulesByCategories()
+	throws Exception
+    {
+    	Map< String, Map<String, List<String>> > res_map_modules_by_cat = new HashMap< String, Map<String, List<String>> >();
+	Map< String, Map<String, List<MaryModule>> > map_modules_by_cat = ModuleRegistry.listModulesByCategories();
+    	for (String cat: map_modules_by_cat.keySet())
+    	{
+	    Map<String, List<MaryModule>> cat_subpart = map_modules_by_cat.get(cat);
+	    res_map_modules_by_cat.put(cat, new HashMap<String, List<String>>());
 
-	return res_map_modules_by_cat;
+	    for (String conf: cat_subpart.keySet()) {
+		ArrayList<String> list_modules = new ArrayList<String>();
+
+		for (MaryModule m: cat_subpart.get(conf))
+		    list_modules.add(m.getClass().getName());
+		res_map_modules_by_cat.get(cat).put(conf, list_modules);
+	    }
+    	}
+
+    	return res_map_modules_by_cat;
     }
 
 
@@ -169,7 +160,7 @@ public class MaryController {
     @RequestMapping(value="/getDescription", method = RequestMethod.POST)
     public String getDescription(@RequestParam(value = "module") String module)
 	throws Exception {
-	return ModuleRegistry.getModule(module).getDescription();
+	return ModuleRegistry.getDefaultModule(module).getDescription();
     }
 
     /**
