@@ -1,13 +1,11 @@
-MARY TTS README
-===============
+# MaryTTS HTTP server
 
 This is the source code repository for the HTTP Server RESTFUL wrapper of the multilingual open-source MARY text-to-speech platform (MaryTTS).  **MaryTTS can be found on [this page](https://github.com/marytts/marytts/)**.
 
 The code comes under the Lesser General Public License LGPL version 3 -- see LICENSE.txt for details.
 
 
-Running
--------
+## Installation & Running
 
 To run the server you just have to execute this command in a terminal:
 
@@ -20,8 +18,14 @@ You can access to the server through this address:
 http://localhost:59125
 ```
 
-Documentation
--------------
+It is possible to define the default "highest" level of the server by defining the system property `log4j.level` like for example
+
+```shell
+./gradlew bootRun -Dlog4j.level=DEBUG
+```
+
+## Documentation
+
 The MaryTTS HTTP Server comes with nicely formatted REST API documentation. To access the documentation, first build the project with following command:
 ```
 ./gradlew build
@@ -34,11 +38,3 @@ You can then access the documentation through following URL in your browser:
 ```
 http://localhost:59125/docs/index.html
 ```
-
-Logging
--------
-MaryTTS http server uses Log4j2 for logging. By default, it logs the output to the console. If you want to override the default configuration, you can specify a custom Log4j2 XML file while starting the server like following:
-```
-./gradlew bootRun -Pargs="<complete-path-to-log4j2-xml-file>"
-```
-[Learn more](http://mycuteblog.com/log4j2-xml-configuration-example/) about creating a valid Log4j2 XML file or look into `src/main/resources/log4j2-test.xml` for an example.
