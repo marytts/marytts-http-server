@@ -79,13 +79,13 @@ public class WebLayerTest {
                        .build();
 
 
-	MaryLauncher.start();
+        MaryLauncher.start();
     }
 
     @Test
     public void getDefaultConfiguration() throws Exception {
         this.mockMvc.perform(get("/getDefaultConfiguration").accept(MediaType.APPLICATION_JSON))
-	    .andExpect(status().isOk());
+        .andExpect(status().isOk());
     }
 
     @Test
@@ -93,7 +93,7 @@ public class WebLayerTest {
         this.mockMvc.perform(post("/getConfiguration")
                              .param("set", "en_US")
                              .accept(MediaType.APPLICATION_JSON))
-	    .andExpect(status().isOk());
+        .andExpect(status().isOk());
     }
     @Test
     public void setConfiguration() throws Exception {

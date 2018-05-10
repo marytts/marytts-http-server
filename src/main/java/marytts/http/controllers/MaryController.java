@@ -109,7 +109,7 @@ public class MaryController {
      * @param set the set identifying the configuration
      * @throws Exception in case of unexisting local
      */
-    @RequestMapping(value="/getDefaultConfiguration")
+    @RequestMapping(value = "/getDefaultConfiguration")
     public String getDefaultConfiguration()
     throws Exception {
         return MaryConfigurationFactory.getDefaultConfiguration().toString();
@@ -122,7 +122,7 @@ public class MaryController {
      * @param set the set identifying the configuration
      * @throws Exception in case of unexisting local
      */
-    @RequestMapping(value="/getConfiguration", method = RequestMethod.POST)
+    @RequestMapping(value = "/getConfiguration", method = RequestMethod.POST)
     public String getConfiguration(@RequestParam(value = "set") String set)
     throws Exception {
         return MaryConfigurationFactory.getConfiguration(set).toString();
@@ -135,27 +135,26 @@ public class MaryController {
      * @param set the set identifying the configuration
      * @throws Exception in case of unexisting local
      */
-    @RequestMapping(value="/listAvailableModulesByCategories", method = RequestMethod.POST)
+    @RequestMapping(value = "/listAvailableModulesByCategories", method = RequestMethod.POST)
     public Map< String, Map<String, List<String>> > listAvailableModulesByCategories()
-	throws Exception
-    {
-    	Map< String, Map<String, List<String>> > res_map_modules_by_cat = new HashMap< String, Map<String, List<String>> >();
-	Map< String, Map<String, List<MaryModule>> > map_modules_by_cat = ModuleRegistry.listModulesByCategories();
-    	for (String cat: map_modules_by_cat.keySet())
-    	{
-	    Map<String, List<MaryModule>> cat_subpart = map_modules_by_cat.get(cat);
-	    res_map_modules_by_cat.put(cat, new HashMap<String, List<String>>());
+    throws Exception {
+        Map< String, Map<String, List<String>> > res_map_modules_by_cat = new HashMap< String, Map<String, List<String>> >();
+        Map< String, Map<String, List<MaryModule>> > map_modules_by_cat = ModuleRegistry.listModulesByCategories();
+        for (String cat : map_modules_by_cat.keySet()) {
+            Map<String, List<MaryModule>> cat_subpart = map_modules_by_cat.get(cat);
+            res_map_modules_by_cat.put(cat, new HashMap<String, List<String>>());
 
-	    for (String conf: cat_subpart.keySet()) {
-		ArrayList<String> list_modules = new ArrayList<String>();
+            for (String conf : cat_subpart.keySet()) {
+                ArrayList<String> list_modules = new ArrayList<String>();
 
-		for (MaryModule m: cat_subpart.get(conf))
-		    list_modules.add(m.getClass().getName());
-		res_map_modules_by_cat.get(cat).put(conf, list_modules);
-	    }
-    	}
+                for (MaryModule m : cat_subpart.get(conf)) {
+                    list_modules.add(m.getClass().getName());
+                }
+                res_map_modules_by_cat.get(cat).put(conf, list_modules);
+            }
+        }
 
-    	return res_map_modules_by_cat;
+        return res_map_modules_by_cat;
     }
 
 
@@ -165,18 +164,17 @@ public class MaryController {
      * @param set the set identifying the configuration
      * @throws Exception in case of unexisting local
      */
-    @RequestMapping(value="/listAvailableSerializers", method = RequestMethod.POST)
+    @RequestMapping(value = "/listAvailableSerializers", method = RequestMethod.POST)
     public List<String> listAvailableSerializers()
-	throws Exception
-    {
-	List<String> list_serializers = new ArrayList<String>();
-	Reflections reflections = new Reflections("marytts");
-        for (Class<? extends Serializer>  s: reflections.getSubTypesOf(Serializer.class)) {
-	    if (! Modifier.isAbstract(s.getModifiers())) {
-		list_serializers.add(s.getName());
-	    }
+    throws Exception {
+        List<String> list_serializers = new ArrayList<String>();
+        Reflections reflections = new Reflections("marytts");
+        for (Class<? extends Serializer>  s : reflections.getSubTypesOf(Serializer.class)) {
+            if (! Modifier.isAbstract(s.getModifiers())) {
+                list_serializers.add(s.getName());
+            }
         }
-	return list_serializers;
+        return list_serializers;
     }
 
 
@@ -186,10 +184,10 @@ public class MaryController {
      * @param set the set identifying the configuration
      * @throws Exception in case of unexisting local
      */
-    @RequestMapping(value="/getDescription", method = RequestMethod.POST)
+    @RequestMapping(value = "/getDescription", method = RequestMethod.POST)
     public String getDescription(@RequestParam(value = "module") String module)
-	throws Exception {
-	return ModuleRegistry.getDefaultModule(module).getDescription();
+    throws Exception {
+        return ModuleRegistry.getDefaultModule(module).getDescription();
     }
 
     /**
@@ -239,11 +237,11 @@ public class MaryController {
 
         Exception save_ex = null;
         Object output = null;
-	Request request = null;
+        Request request = null;
 
         try {
-	    InputStream configuration_stream = new ByteArrayInputStream(configuration.getBytes("UTF-8"));
-	    MaryConfiguration conf_object = (new JSONMaryConfigLoader()).loadConfiguration(configuration_stream);
+            InputStream configuration_stream = new ByteArrayInputStream(configuration.getBytes("UTF-8"));
+            MaryConfiguration conf_object = (new JSONMaryConfigLoader()).loadConfiguration(configuration_stream);
             request = new Request(conf_object, input_data);
             request.process();
             output = request.serializeFinaleUtterance();
@@ -252,13 +250,14 @@ public class MaryController {
         }
 
 
-	// Retrieve logger if necessary
+        // Retrieve logger if necessary
         String log_result = "";
-	if (request != null) {
-	    ByteArrayOutputStream baos_logger = request.getBaosLogger();
-	    if (baos_logger != null)
-		log_result = baos_logger.toString("UTF-8");
-	}
+        if (request != null) {
+            ByteArrayOutputStream baos_logger = request.getBaosLogger();
+            if (baos_logger != null) {
+                log_result = baos_logger.toString("UTF-8");
+            }
+        }
 
         return new MaryResponse(output, log_result, false, save_ex);
     }

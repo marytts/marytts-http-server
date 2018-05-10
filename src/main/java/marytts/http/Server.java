@@ -48,7 +48,7 @@ public class Server {
             }
         }
 
-	// Startup
-	MaryLauncher.start();
+        // Startup
+        MaryLauncher.start();
     }
 }
