@@ -27,7 +27,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import marytts.modules.ModuleRegistry;
+
+
+// Reflection
+import org.reflections.Reflections;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 
 
 /* Utils */
@@ -56,6 +62,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+
+import marytts.io.serializer.Serializer;
 import marytts.modules.ModuleRegistry;
 import marytts.modules.MaryModule;
 
@@ -148,6 +156,27 @@ public class MaryController {
     	}
 
     	return res_map_modules_by_cat;
+    }
+
+
+    /**
+     * Method used to get the current configuration
+     *
+     * @param set the set identifying the configuration
+     * @throws Exception in case of unexisting local
+     */
+    @RequestMapping(value="/listAvailableSerializers", method = RequestMethod.POST)
+    public List<String> listAvailableSerializers()
+	throws Exception
+    {
+	List<String> list_serializers = new ArrayList<String>();
+	Reflections reflections = new Reflections("marytts");
+        for (Class<? extends Serializer>  s: reflections.getSubTypesOf(Serializer.class)) {
+	    if (! Modifier.isAbstract(s.getModifiers())) {
+		list_serializers.add(s.getName());
+	    }
+        }
+	return list_serializers;
     }
 
 
