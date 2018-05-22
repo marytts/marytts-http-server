@@ -109,17 +109,4 @@ public class WebLayerTest {
         .andExpect(status().isOk());
     }
 
-    public void setLoggerLevel() throws Exception {
-
-        this.document.document(
-            requestParameters(
-                parameterWithName("level").description("The new logging level e.g. DEBUG")
-            )
-        );
-
-        this.mockMvc.perform(get("/setLoggerLevel")
-                             .param("level", "DEBUG")
-                             .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
-    }
 }
