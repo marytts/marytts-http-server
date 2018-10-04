@@ -44,7 +44,7 @@ import marytts.runutils.Mary;
  *
  *
  */
-public class MaryLauncher extends Mary implements Runnable{
+public class MaryLauncher extends Mary implements Runnable {
 
     private static Logger logger;
 
@@ -56,8 +56,8 @@ public class MaryLauncher extends Mary implements Runnable{
 
     protected MaryLauncher() throws Exception {
         // setDaemon(true);
-	configureLogging();
-	startup();
+        configureLogging();
+        startup();
     }
 
     @Override
@@ -80,7 +80,7 @@ public class MaryLauncher extends Mary implements Runnable{
      */
     public static synchronized void start() {
         try {
-	    (new Thread(new MaryLauncher())).start();   //startup marytts
+            (new Thread(new MaryLauncher())).start();   //startup marytts
         } catch (Exception ex) {
             logger.error("Error while starting mary launcher startup():" + ex);
         }

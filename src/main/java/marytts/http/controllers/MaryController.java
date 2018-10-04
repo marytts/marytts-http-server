@@ -27,7 +27,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import marytts.modules.ModuleRegistry;
+
+
+// Reflection
+import org.reflections.Reflections;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 
 
 /* Utils */
@@ -52,8 +58,12 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+
+import marytts.io.serializer.Serializer;
 import marytts.modules.ModuleRegistry;
 import marytts.modules.MaryModule;
 
@@ -99,7 +109,7 @@ public class MaryController {
      * @param set the set identifying the configuration
      * @throws Exception in case of unexisting local
      */
-    @RequestMapping(value="/getDefaultConfiguration")
+    @RequestMapping(value = "/getDefaultConfiguration")
     public String getDefaultConfiguration()
     throws Exception {
         return MaryConfigurationFactory.getDefaultConfiguration().toString();
@@ -112,12 +122,11 @@ public class MaryController {
      * @param set the set identifying the configuration
      * @throws Exception in case of unexisting local
      */
-    @RequestMapping(value="/getConfiguration", method = RequestMethod.POST)
+    @RequestMapping(value = "/getConfiguration", method = RequestMethod.POST)
     public String getConfiguration(@RequestParam(value = "set") String set)
     throws Exception {
         return MaryConfigurationFactory.getConfiguration(set).toString();
     }
-
 
 
     /**
@@ -126,14 +135,59 @@ public class MaryController {
      * @param set the set identifying the configuration
      * @throws Exception in case of unexisting local
      */
-    @RequestMapping(value="/listAvailableModules")
-    public List<String> listAvailableModules()
+    @RequestMapping(value = "/listAvailableModulesByCategories", method = RequestMethod.POST)
+    public Map< String, Map<String, List<String>> > listAvailableModulesByCategories()
     throws Exception {
-	ArrayList<String> list_modules = new ArrayList<String>();
-	for (MaryModule m: ModuleRegistry.listRegisteredModules())
-	    list_modules.add(m.getClass().toString());
+        Map< String, Map<String, List<String>> > res_map_modules_by_cat = new HashMap< String, Map<String, List<String>> >();
+        Map< String, Map<String, List<MaryModule>> > map_modules_by_cat = ModuleRegistry.listModulesByCategories();
+        for (String cat : map_modules_by_cat.keySet()) {
+            Map<String, List<MaryModule>> cat_subpart = map_modules_by_cat.get(cat);
+            res_map_modules_by_cat.put(cat, new HashMap<String, List<String>>());
 
-	return list_modules;
+            for (String conf : cat_subpart.keySet()) {
+                ArrayList<String> list_modules = new ArrayList<String>();
+
+                for (MaryModule m : cat_subpart.get(conf)) {
+                    list_modules.add(m.getClass().getName());
+                }
+                res_map_modules_by_cat.get(cat).put(conf, list_modules);
+            }
+        }
+
+        return res_map_modules_by_cat;
+    }
+
+
+    /**
+     * Method used to get the current configuration
+     *
+     * @param set the set identifying the configuration
+     * @throws Exception in case of unexisting local
+     */
+    @RequestMapping(value = "/listAvailableSerializers", method = RequestMethod.POST)
+    public List<String> listAvailableSerializers()
+    throws Exception {
+        List<String> list_serializers = new ArrayList<String>();
+        Reflections reflections = new Reflections("marytts");
+        for (Class<? extends Serializer>  s : reflections.getSubTypesOf(Serializer.class)) {
+            if (! Modifier.isAbstract(s.getModifiers())) {
+                list_serializers.add(s.getName());
+            }
+        }
+        return list_serializers;
+    }
+
+
+    /**
+     * Method used to get the module description
+     *
+     * @param set the set identifying the configuration
+     * @throws Exception in case of unexisting local
+     */
+    @RequestMapping(value = "/getDescription", method = RequestMethod.POST)
+    public String getDescription(@RequestParam(value = "module") String module)
+    throws Exception {
+        return ModuleRegistry.getDefaultModule(module).getDescription();
     }
 
     /**
@@ -154,19 +208,6 @@ public class MaryController {
 
     }
 
-    @RequestMapping(value = "/setLoggerLevel", method = RequestMethod.POST)
-    public void  setLoggerLevel(@RequestParam(value = "level") String level) throws Exception {
-	if (level == "ERROR")
-	    current_level = Level.ERROR;
-	else if (level == "WARN")
-	    current_level = Level.WARN;
-	else if (level == "INFO")
-	    current_level = Level.INFO;
-	else if (level == "DEBUG")
-	    current_level = Level.DEBUG;
-	else
-	    throw new Exception("\"" + level + "\" is an unknown level");
-    }
     /**
      * ************************************************************************
      ** Process (except synthesis)
@@ -193,35 +234,30 @@ public class MaryController {
             throw new IllegalStateException("MARY system is not running");
         }
 
-        int id = counter.incrementAndGet();
 
         Exception save_ex = null;
         Object output = null;
-
-
-
-        ByteArrayOutputStream baos_logger = new ByteArrayOutputStream();
-        ThresholdFilter threshold_filter = ThresholdFilter.createFilter(current_level, null, null);
-        LoggerContext context = LoggerContext.getContext(false);
-        Configuration config = context.getConfiguration();
-        PatternLayout layout = PatternLayout.createDefaultLayout(config);
-        Appender appender = OutputStreamAppender.createAppender(layout, threshold_filter, baos_logger,
-                            "client " + (new Integer(id)).toString(),
-                            false, true);
-        appender.start();
+        Request request = null;
 
         try {
-	    InputStream configuration_stream = new ByteArrayInputStream(configuration.getBytes("UTF-8"));
-	    MaryConfiguration conf_object = (new JSONMaryConfigLoader()).loadConfiguration(configuration_stream);
-            Request request = new Request(appender, conf_object, input_data);
+            InputStream configuration_stream = new ByteArrayInputStream(configuration.getBytes("UTF-8"));
+            MaryConfiguration conf_object = (new JSONMaryConfigLoader()).loadConfiguration(configuration_stream);
+            request = new Request(conf_object, input_data);
             request.process();
             output = request.serializeFinaleUtterance();
         } catch (Exception ex) {
             save_ex = ex;
         }
 
-        String log_result = baos_logger.toString("UTF-8");
-        appender.stop();
+
+        // Retrieve logger if necessary
+        String log_result = "";
+        if (request != null) {
+            ByteArrayOutputStream baos_logger = request.getBaosLogger();
+            if (baos_logger != null) {
+                log_result = baos_logger.toString("UTF-8");
+            }
+        }
 
         return new MaryResponse(output, log_result, false, save_ex);
     }

@@ -1,26 +1,22 @@
 // FIXME: add test if voices exist in the class path !
 buildscript {
     repositories {
-	mavenLocal()
         maven {
-            url 'https://oss.jfrog.org/artifactory/repo'
+            url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
         }
         jcenter()
     }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.0.RELEASE")
-        //rest docs generation
-        classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
-    }
 }
 
+plugins {
+    id 'java'
+    id "org.springframework.boot" version "2.0.1.RELEASE"
+    id "org.asciidoctor.gradle.asciidoctor" version "1.5.1"
+    id 'application'
+}
 
-apply plugin: 'java'
-//apply plugin: 'eclipse'
-//apply plugin: 'idea'
-apply plugin: 'spring-boot'
-apply plugin: 'org.asciidoctor.convert'
-apply plugin: 'application'
+apply plugin: 'io.spring.dependency-management' // FIXME: try to find away to avoid the "apply !"
+
 mainClassName = 'marytts.http.Server'
 
 version '0.1.0-SNAPSHOT'
@@ -36,7 +32,6 @@ jar {
 }
 
 repositories {
-    mavenLocal()
     jcenter()
     maven {
         url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
@@ -128,6 +123,7 @@ asciidoctor {
  ***********************************************************************************************/
 //pass agrument to Application class
 bootRun {
+    systemProperties = System.properties
     if ( project.hasProperty('args') ) {
         args project.args.split('\\s+')
     }
